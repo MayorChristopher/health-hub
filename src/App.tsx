@@ -22,7 +22,6 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/register" element={<Registration />} />
@@ -34,7 +33,6 @@ const App = () => (
             <Route path="/medical-dashboard" element={<MedicalDashboardNew />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </AnimatePresence>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

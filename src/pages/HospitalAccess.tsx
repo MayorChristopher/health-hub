@@ -84,7 +84,7 @@ const HospitalAccess = () => {
             transition={{ delay: 0.6 }}
             className="text-xs text-muted-foreground text-center mt-8"
           >
-            By continuing you agree to CampusGuide+'s{" "}
+            By continuing you agree to HealthMR's{" "}
             <span className="text-primary underline cursor-pointer">Terms of Service</span> and{" "}
             <span className="text-primary underline cursor-pointer">Privacy Policy</span>
           </motion.p>

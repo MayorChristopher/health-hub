@@ -30,7 +30,7 @@ const UserAccess = () => {
             transition={{ delay: 0.2 }}
             className="text-center mb-8"
           >
-            <h1 className="text-2xl font-bold text-primary mb-2">Welcome to HealthID</h1>
+            <h1 className="text-2xl font-bold text-primary mb-2">Welcome to HealthMR</h1>
             <p className="text-muted-foreground text-sm">
               Securely access your health information
             </p>
@@ -83,7 +83,7 @@ const UserAccess = () => {
             transition={{ delay: 0.6 }}
             className="text-xs text-muted-foreground text-center mt-8"
           >
-            By continuing you agree to CampusGuide+'s{" "}
+            By continuing you agree to HealthMR's{" "}
             <span className="text-primary underline cursor-pointer">Terms of Service</span> and{" "}
             <span className="text-primary underline cursor-pointer">Privacy Policy</span>
           </motion.p>

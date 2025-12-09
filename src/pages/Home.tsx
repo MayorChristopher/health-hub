@@ -19,34 +19,34 @@ const Home = () => {
               <p className="text-xs text-gray-500">Electronic Medical Records</p>
             </div>
           </div>
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-4 lg:gap-8">
             <a href="#features" className="text-gray-700 hover:text-medical-green">Features</a>
             <a href="#stats" className="text-gray-700 hover:text-medical-green">About</a>
-            <Button onClick={() => navigate("/register")} className="bg-medical-green hover:bg-medical-dark">
-              Patient Login
+            <Button onClick={() => navigate("/register")} size="sm" className="bg-medical-green hover:bg-medical-dark">
+              Patient
             </Button>
-            <Button onClick={() => navigate("/hospital-access")} variant="outline" className="border-medical-green text-medical-green">
-              Staff Login
+            <Button onClick={() => navigate("/hospital-access")} size="sm" variant="outline" className="border-medical-green text-medical-green">
+              Staff
             </Button>
           </nav>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="py-20 bg-gradient-to-b from-green-50 to-white">
+      <section className="py-12 md:py-20 bg-gradient-to-b from-green-50 to-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="inline-block px-4 py-2 bg-green-100 text-medical-green rounded-full text-sm font-medium mb-6">
                 Abia State Healthcare Initiative
               </div>
-              <h2 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
                 Comprehensive Medical Records System for Abia State
               </h2>
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              <p className="text-base md:text-lg lg:text-xl text-gray-600 mb-8 leading-relaxed">
                 Integrated EMR platform managing complete patient care workflow—from registration and vitals to consultation, laboratory, pharmacy, and herbal medicine tracking.
               </p>
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" onClick={() => navigate("/register")} className="bg-medical-green hover:bg-medical-dark px-8">
                   Access Your Records
                 </Button>
@@ -93,7 +93,7 @@ const Home = () => {
       </section>
 
       {/* Features */}
-      <section id="features" className="py-20 bg-white">
+      <section id="features" className="py-12 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h3 className="text-3xl font-bold text-gray-900 mb-4">Complete Healthcare Workflow</h3>
@@ -137,9 +137,9 @@ const Home = () => {
       </section>
 
       {/* Stats */}
-      <section id="stats" className="py-20 bg-medical-light">
+      <section id="stats" className="py-12 md:py-20 bg-medical-light">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
+          <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>
               <p className="text-4xl font-bold text-medical-green mb-2">100%</p>
               <p className="text-gray-600">Secure & Encrypted</p>
@@ -148,10 +148,7 @@ const Home = () => {
               <p className="text-4xl font-bold text-medical-green mb-2">24/7</p>
               <p className="text-gray-600">Access Anytime</p>
             </div>
-            <div>
-              <p className="text-4xl font-bold text-medical-green mb-2">NIN</p>
-              <p className="text-gray-600">Verified Identity</p>
-            </div>
+
             <div>
               <p className="text-4xl font-bold text-medical-green mb-2">6</p>
               <p className="text-gray-600">Integrated Modules</p>

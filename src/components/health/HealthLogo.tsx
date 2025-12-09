@@ -62,7 +62,7 @@ const HealthLogo = ({ variant = "light", size = "md" }: HealthLogoProps) => {
       </div>
       
       <span className={`font-bold ${sizeClasses[size]} ${textColor}`}>
-        HealthID
+        HealthMR
       </span>
       
       {/* Verified checkmark */}
