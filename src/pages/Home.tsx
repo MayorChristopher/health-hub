@@ -20,9 +20,8 @@ const Home = () => {
             </div>
           </div>
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#about" className="text-gray-700 hover:text-medical-green">About</a>
             <a href="#features" className="text-gray-700 hover:text-medical-green">Features</a>
-            <a href="#contact" className="text-gray-700 hover:text-medical-green">Contact</a>
+            <a href="#stats" className="text-gray-700 hover:text-medical-green">About</a>
             <Button onClick={() => navigate("/register")} className="bg-medical-green hover:bg-medical-dark">
               Patient Login
             </Button>
@@ -42,7 +41,7 @@ const Home = () => {
                 Abia State Healthcare Initiative
               </div>
               <h2 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                Comprehensive Medical Records System for Nigeria
+                Comprehensive Medical Records System for Abia State
               </h2>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
                 Integrated EMR platform managing complete patient care workflow—from registration and vitals to consultation, laboratory, pharmacy, and herbal medicine tracking.
@@ -138,7 +137,7 @@ const Home = () => {
       </section>
 
       {/* Stats */}
-      <section className="py-20 bg-medical-light">
+      <section id="stats" className="py-20 bg-medical-light">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
@@ -198,7 +197,7 @@ const Home = () => {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; 2024 HealthMR. Abia Starthon Project.</p>
+            <p>&copy; 2025 HealthMR. Abia Starthon Project.</p>
           </div>
         </div>
       </footer>
