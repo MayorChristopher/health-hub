@@ -28,9 +28,10 @@ const LandingPro = () => {
             <span className="text-xl font-bold text-medical-green hidden sm:block">HealthMR</span>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
+            <Button variant="ghost" onClick={() => navigate("/patient-login")} className="text-sm md:text-base">Patient Login</Button>
             <Button variant="ghost" onClick={() => navigate("/staff-login")} className="text-sm md:text-base">Staff</Button>
             <Button onClick={() => navigate("/register")} className="bg-medical-green hover:bg-medical-dark text-sm md:text-base">
-              Get Started
+              Register
             </Button>
           </div>
         </div>

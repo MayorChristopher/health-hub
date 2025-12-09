@@ -24,19 +24,22 @@ const PatientDashboardNew = () => {
       return;
     }
 
-    const { data } = await supabase
+    const { data: patient } = await supabase
       .from('patients')
       .select('*')
       .eq('user_id', user.id)
       .single();
-    if (data) setPatientData(data);
     
-    const { data: appts } = await supabase
-      .from('appointments')
-      .select('*')
-      .eq('patient_id', data?.id)
-      .limit(5);
-    if (appts) setAppointments(appts);
+    if (patient) {
+      setPatientData(patient);
+      
+      const { data: appts } = await supabase
+        .from('appointments')
+        .select('*')
+        .eq('patient_id', patient.id)
+        .limit(5);
+      if (appts) setAppointments(appts);
+    }
   };
 
   const handleLogout = async () => {
@@ -98,16 +101,23 @@ const PatientDashboardNew = () => {
                   <p className="text-gray-600">HealthMR ID: {patientData?.healthmr_id || 'Loading...'}</p>
                 </div>
                 <div className="grid sm:grid-cols-3 gap-4">
-                  <StatCard label="Upcoming Visits" value="2" />
-                  <StatCard label="Active Prescriptions" value="3" />
-                  <StatCard label="Pending Results" value="1" />
+                  <StatCard label="Upcoming Visits" value={appointments.length.toString()} />
+                  <StatCard label="Active Prescriptions" value="0" />
+                  <StatCard label="Pending Results" value="0" />
                 </div>
                 <Card className="p-6">
                   <h3 className="font-semibold text-medical-dark mb-4">Recent Activity</h3>
-                  <div className="space-y-3">
-                    <ActivityItem title="Blood Test Completed" date="2 days ago" />
-                    <ActivityItem title="Prescription Refilled" date="5 days ago" />
-                  </div>
+                  {!patientData ? (
+                    <p className="text-gray-500 text-sm">Loading...</p>
+                  ) : appointments.length > 0 ? (
+                    <div className="space-y-3">
+                      {appointments.map((apt) => (
+                        <ActivityItem key={apt.id} title={apt.reason || 'Appointment'} date={new Date(apt.appointment_date).toLocaleDateString()} />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm">No recent activity</p>
+                  )}
                 </Card>
               </div>
             )}
@@ -115,8 +125,21 @@ const PatientDashboardNew = () => {
             {activeTab === "records" && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-medical-dark">Medical Records</h2>
-                <RecordCard title="Annual Checkup Report" date="Jan 15, 2024" />
-                <RecordCard title="Blood Test Results" date="Dec 20, 2023" />
+                <p className="text-gray-500">No medical records available yet. Records will appear here after consultations.</p>
+              </div>
+            )}
+
+            {activeTab === "prescriptions" && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-medical-dark">Prescriptions</h2>
+                <p className="text-gray-500">No active prescriptions. Prescriptions from consultations will appear here.</p>
+              </div>
+            )}
+
+            {activeTab === "labs" && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-medical-dark">Lab Results</h2>
+                <p className="text-gray-500">No lab results available. Test results will appear here when ready.</p>
               </div>
             )}
 
@@ -124,9 +147,20 @@ const PatientDashboardNew = () => {
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-bold text-medical-dark">Appointments</h2>
-                  <Button className="bg-medical-green hover:bg-medical-dark">Book New</Button>
+                  <Button className="bg-medical-green hover:bg-medical-dark" onClick={() => alert('Appointment booking coming soon!')}>Book New</Button>
                 </div>
-                <RecordCard title="Dr. Sarah Johnson - Cardiology" date="Feb 10, 2024 at 10:00 AM" action="Reschedule" />
+                {appointments.length > 0 ? (
+                  appointments.map((apt) => (
+                    <RecordCard 
+                      key={apt.id}
+                      title={apt.reason || 'Appointment'} 
+                      date={new Date(apt.appointment_date).toLocaleString()} 
+                      action="View" 
+                    />
+                  ))
+                ) : (
+                  <p className="text-gray-500">No appointments scheduled</p>
+                )}
               </div>
             )}
           </main>
@@ -149,7 +183,7 @@ const ActivityItem = ({ title, date }: { title: string; date: string }) => (
       <p className="font-medium text-gray-900">{title}</p>
       <p className="text-sm text-gray-500">{date}</p>
     </div>
-    <Button size="sm" variant="outline" className="border-medical-green text-medical-green">View</Button>
+    <Button size="sm" variant="outline" className="border-medical-green text-medical-green" onClick={() => alert('View details coming soon!')}>View</Button>
   </div>
 );
 
@@ -159,7 +193,7 @@ const RecordCard = ({ title, date, action }: { title: string; date: string; acti
       <p className="font-medium text-gray-900">{title}</p>
       <p className="text-sm text-gray-500">{date}</p>
     </div>
-    <Button size="sm" className="bg-medical-green hover:bg-medical-dark">{action || "Download"}</Button>
+    <Button size="sm" className="bg-medical-green hover:bg-medical-dark" onClick={() => alert('Feature coming soon!')}>{action || "Download"}</Button>
   </Card>
 );
 

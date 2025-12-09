@@ -18,45 +18,65 @@ const PatientLogin = () => {
     e.preventDefault();
     setLoading(true);
     
-    // Find patient by HealthMR ID and NIN
-    const { data: patient, error: findError } = await supabase
-      .from('patients')
-      .select('*')
-      .eq('healthmr_id', healthmrId)
-      .eq('nin', nin)
-      .single();
+    try {
+      // Find patient by HealthMR ID and NIN
+      const { data: patient, error: findError } = await supabase
+        .from('patients')
+        .select('*')
+        .eq('healthmr_id', healthmrId.toUpperCase())
+        .eq('nin', nin)
+        .single();
 
-    if (findError || !patient) {
-      setLoading(false);
+      if (findError || !patient) {
+        toast({
+          title: "Login Failed",
+          description: "Invalid HealthMR ID or NIN. Please check your credentials.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Check if user_id exists (account created)
+      if (!patient.user_id) {
+        toast({
+          title: "Account Setup Required",
+          description: "Please contact hospital admin to complete your account setup.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Sign in with their email and auto-generated password
+      const { error } = await supabase.auth.signInWithPassword({
+        email: patient.email,
+        password: nin + "@HealthMR",
+      });
+
+      if (error) {
+        toast({
+          title: "Login Failed",
+          description: "Authentication error. Please try again or contact support.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
       toast({
-        title: "Login Failed",
-        description: "Invalid HealthMR ID or NIN",
+        title: "Login Successful",
+        description: `Welcome back, ${patient.first_name}!`,
+      });
+      navigate("/patient-dashboard");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
-      return;
-    }
-
-    // Sign in with their email and auto-generated password
-    const { error } = await supabase.auth.signInWithPassword({
-      email: patient.email,
-      password: nin + "@HealthMR",
-    });
-
-    if (error) {
       setLoading(false);
-      toast({
-        title: "Login Failed",
-        description: error.message,
-        variant: "destructive"
-      });
-      return;
     }
-
-    toast({
-      title: "Login Successful",
-      description: `Welcome back, ${patient.first_name}!`,
-    });
-    navigate("/patient-dashboard");
   };
 
   return (
