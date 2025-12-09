@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -9,6 +10,39 @@ import { useNavigate } from "react-router-dom";
 const PatientDashboardNew = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
+  const [patientData, setPatientData] = useState<any>(null);
+  const [appointments, setAppointments] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchPatientData();
+  }, []);
+
+  const fetchPatientData = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      navigate('/patient-login');
+      return;
+    }
+
+    const { data } = await supabase
+      .from('patients')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+    if (data) setPatientData(data);
+    
+    const { data: appts } = await supabase
+      .from('appointments')
+      .select('*')
+      .eq('patient_id', data?.id)
+      .limit(5);
+    if (appts) setAppointments(appts);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
 
   const Sidebar = () => (
     <div className="space-y-1">
@@ -45,12 +79,10 @@ const PatientDashboardNew = () => {
               </SheetTrigger>
               <SheetContent side="left"><Sidebar /></SheetContent>
             </Sheet>
-            <div className="w-8 h-8 bg-medical-green rounded flex items-center justify-center">
-              <Activity className="h-5 w-5 text-white" />
-            </div>
+            <img src="/logo.png" alt="HealthMR" className="h-10" />
             <span className="font-bold text-medical-green">HealthMR</span>
           </div>
-          <Avatar><AvatarFallback className="bg-medical-green text-white">JD</AvatarFallback></Avatar>
+          <Button variant="ghost" onClick={handleLogout}>Logout</Button>
         </div>
       </header>
 
@@ -62,8 +94,8 @@ const PatientDashboardNew = () => {
             {activeTab === "overview" && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-medical-dark">Welcome, John Doe</h2>
-                  <p className="text-gray-600">HealthMR ID: HMR-2024-001234</p>
+                  <h2 className="text-2xl font-bold text-medical-dark">Welcome, {patientData?.first_name || 'Patient'}</h2>
+                  <p className="text-gray-600">HealthMR ID: {patientData?.healthmr_id || 'Loading...'}</p>
                 </div>
                 <div className="grid sm:grid-cols-3 gap-4">
                   <StatCard label="Upcoming Visits" value="2" />

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
+import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +12,7 @@ import { Activity, ArrowLeft } from "lucide-react";
 
 const Registration = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -29,9 +32,76 @@ const Registration = () => {
     herbalTypes: [] as string[],
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/verify");
+    setLoading(true);
+    
+    try {
+      // Validate password length (NIN must be 11 digits)
+      if (formData.nin.length !== 11) {
+        toast({
+          title: "Invalid NIN",
+          description: "NIN must be exactly 11 digits",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Create auth user with proper password
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.nin + "@HealthMR", // Make password meet requirements
+      });
+
+      if (authError) throw authError;
+
+      // Create patient record
+      const { error: dbError } = await supabase
+        .from('patients')
+        .insert([{
+          user_id: authData.user?.id,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          nin: formData.nin,
+          phone: formData.phone,
+          email: formData.email,
+          date_of_birth: formData.dob,
+          gender: formData.gender,
+          blood_group: formData.bloodGroup,
+          address: formData.address,
+          state: formData.state,
+          lga: formData.lga,
+          occupation: formData.occupation,
+          next_of_kin_name: formData.nextOfKinName,
+          next_of_kin_phone: formData.nextOfKinPhone,
+          uses_herbal_medicine: formData.usesHerbalMedicine,
+          herbal_types: formData.herbalTypes
+        }]);
+
+      if (dbError) throw dbError;
+
+      // Get the generated HealthMR ID
+      const { data: newPatient } = await supabase
+        .from('patients')
+        .select('healthmr_id, first_name')
+        .eq('user_id', authData.user?.id)
+        .single();
+
+      toast({
+        title: "Registration Successful!",
+        description: `Your HealthMR ID: ${newPatient?.healthmr_id}. Save this for login.`,
+        duration: 10000,
+      });
+      
+      navigate("/patient-dashboard");
+    } catch (error: any) {
+      setLoading(false);
+      toast({
+        title: "Registration Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -42,15 +112,12 @@ const Registration = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-medical-green rounded flex items-center justify-center">
-              <Activity className="h-5 w-5 text-white" />
-            </div>
-            <span className="font-bold text-medical-green">HealthMR</span>
+            <img src="/logo.png" alt="HealthMR" className="h-10" />
           </div>
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Patient Registration</h1>
           <p className="text-gray-600">Complete your registration to access HealthMR services</p>
@@ -129,8 +196,42 @@ const Registration = () => {
                     <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="abia">Abia</SelectItem>
+                      <SelectItem value="adamawa">Adamawa</SelectItem>
+                      <SelectItem value="akwa-ibom">Akwa Ibom</SelectItem>
+                      <SelectItem value="anambra">Anambra</SelectItem>
+                      <SelectItem value="bauchi">Bauchi</SelectItem>
+                      <SelectItem value="bayelsa">Bayelsa</SelectItem>
+                      <SelectItem value="benue">Benue</SelectItem>
+                      <SelectItem value="borno">Borno</SelectItem>
+                      <SelectItem value="cross-river">Cross River</SelectItem>
+                      <SelectItem value="delta">Delta</SelectItem>
+                      <SelectItem value="ebonyi">Ebonyi</SelectItem>
+                      <SelectItem value="edo">Edo</SelectItem>
+                      <SelectItem value="ekiti">Ekiti</SelectItem>
+                      <SelectItem value="enugu">Enugu</SelectItem>
+                      <SelectItem value="gombe">Gombe</SelectItem>
+                      <SelectItem value="imo">Imo</SelectItem>
+                      <SelectItem value="jigawa">Jigawa</SelectItem>
+                      <SelectItem value="kaduna">Kaduna</SelectItem>
+                      <SelectItem value="kano">Kano</SelectItem>
+                      <SelectItem value="katsina">Katsina</SelectItem>
+                      <SelectItem value="kebbi">Kebbi</SelectItem>
+                      <SelectItem value="kogi">Kogi</SelectItem>
+                      <SelectItem value="kwara">Kwara</SelectItem>
                       <SelectItem value="lagos">Lagos</SelectItem>
+                      <SelectItem value="nasarawa">Nasarawa</SelectItem>
+                      <SelectItem value="niger">Niger</SelectItem>
+                      <SelectItem value="ogun">Ogun</SelectItem>
+                      <SelectItem value="ondo">Ondo</SelectItem>
+                      <SelectItem value="osun">Osun</SelectItem>
+                      <SelectItem value="oyo">Oyo</SelectItem>
+                      <SelectItem value="plateau">Plateau</SelectItem>
                       <SelectItem value="rivers">Rivers</SelectItem>
+                      <SelectItem value="sokoto">Sokoto</SelectItem>
+                      <SelectItem value="taraba">Taraba</SelectItem>
+                      <SelectItem value="yobe">Yobe</SelectItem>
+                      <SelectItem value="zamfara">Zamfara</SelectItem>
+                      <SelectItem value="fct">FCT Abuja</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -186,8 +287,8 @@ const Registration = () => {
               <Button type="button" variant="outline" onClick={() => navigate("/")} className="flex-1">
                 Cancel
               </Button>
-              <Button type="submit" className="flex-1 bg-medical-green hover:bg-medical-dark">
-                Continue to Verification
+              <Button type="submit" disabled={loading} className="flex-1 bg-medical-green hover:bg-medical-dark">
+                {loading ? "Registering..." : "Continue to Verification"}
               </Button>
             </div>
           </form>

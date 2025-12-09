@@ -24,6 +24,16 @@ CREATE TABLE patients (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Admin Table
+CREATE TABLE admins (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  username VARCHAR(50) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  full_name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- Medical Staff Table
 CREATE TABLE medical_staff (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -33,7 +43,10 @@ CREATE TABLE medical_staff (
   hospital_id VARCHAR(50) NOT NULL,
   phone VARCHAR(15) NOT NULL,
   email VARCHAR(100),
-  created_at TIMESTAMP DEFAULT NOW()
+  password_hash TEXT NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  last_login TIMESTAMP
 );
 
 -- Vitals Table (Nursing Module)
@@ -112,6 +125,8 @@ CREATE INDEX idx_vitals_patient ON vitals(patient_id);
 CREATE INDEX idx_consultations_patient ON consultations(patient_id);
 CREATE INDEX idx_lab_tests_patient ON lab_tests(patient_id);
 CREATE INDEX idx_prescriptions_patient ON prescriptions(patient_id);
+CREATE INDEX idx_admins_username ON admins(username);
+CREATE INDEX idx_medical_staff_staff_id ON medical_staff(staff_id);
 
 -- Enable Row Level Security
 ALTER TABLE patients ENABLE ROW LEVEL SECURITY;
@@ -120,4 +135,53 @@ ALTER TABLE vitals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE consultations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lab_tests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prescriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies (Allow all for demo - restrict in production)
+CREATE POLICY "Allow all on admins" ON admins FOR ALL USING (true);
+CREATE POLICY "Allow all on patients" ON patients FOR ALL USING (true);
+CREATE POLICY "Allow all on medical_staff" ON medical_staff FOR ALL USING (true);
+CREATE POLICY "Allow all on vitals" ON vitals FOR ALL USING (true);
+CREATE POLICY "Allow all on consultations" ON consultations FOR ALL USING (true);
+CREATE POLICY "Allow all on lab_tests" ON lab_tests FOR ALL USING (true);
+CREATE POLICY "Allow all on prescriptions" ON prescriptions FOR ALL USING (true);
+CREATE POLICY "Allow all on appointments" ON appointments FOR ALL USING (true);
+
+-- Function to auto-generate HealthMR ID
+CREATE OR REPLACE FUNCTION generate_healthmr_id()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.healthmr_id := 'HMR-' || TO_CHAR(NOW(), 'YYYY') || '-' || LPAD(NEXTVAL('healthmr_id_seq')::TEXT, 6, '0');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Sequence for HealthMR ID
+CREATE SEQUENCE healthmr_id_seq START 1;
+
+-- Trigger to auto-generate HealthMR ID on patient insert
+CREATE TRIGGER set_healthmr_id
+BEFORE INSERT ON patients
+FOR EACH ROW
+WHEN (NEW.healthmr_id IS NULL)
+EXECUTE FUNCTION generate_healthmr_id();
+
+-- Function to auto-generate Staff ID
+CREATE OR REPLACE FUNCTION generate_staff_id()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.staff_id := 'STF-' || TO_CHAR(NOW(), 'YYYY') || '-' || LPAD(NEXTVAL('staff_id_seq')::TEXT, 6, '0');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Sequence for Staff ID
+CREATE SEQUENCE staff_id_seq START 1;
+
+-- Trigger to auto-generate Staff ID on medical_staff insert
+CREATE TRIGGER set_staff_id
+BEFORE INSERT ON medical_staff
+FOR EACH ROW
+WHEN (NEW.staff_id IS NULL)
+EXECUTE FUNCTION generate_staff_id();
