@@ -7,9 +7,12 @@ import { Activity, FileText, Calendar, Pill, TestTube, LogOut, Menu, Download } 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate } from "react-router-dom";
 import { AddMedicalTestDialog } from "@/components/AddMedicalTestDialog";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/context/LanguageContext";
 
 const PatientDashboardNew = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("overview");
   const [patientData, setPatientData] = useState<any>(null);
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -77,11 +80,11 @@ const PatientDashboardNew = () => {
   const Sidebar = () => (
     <div className="space-y-1">
       {[
-        { id: "overview", icon: Activity, label: "Overview" },
-        { id: "records", icon: FileText, label: "Medical Records" },
-        { id: "appointments", icon: Calendar, label: "Appointments" },
-        { id: "prescriptions", icon: Pill, label: "Prescriptions" },
-        { id: "labs", icon: TestTube, label: "Lab Results" },
+        { id: "overview", icon: Activity, label: t("overview") },
+        { id: "records", icon: FileText, label: t("medicalRecords") },
+        { id: "appointments", icon: Calendar, label: t("appointments") },
+        { id: "prescriptions", icon: Pill, label: t("prescriptions") },
+        { id: "labs", icon: TestTube, label: t("labResults") },
       ].map((item) => (
         <Button
           key={item.id}
@@ -92,8 +95,8 @@ const PatientDashboardNew = () => {
           <item.icon className="mr-2 h-4 w-4" /> {item.label}
         </Button>
       ))}
-      <Button variant="ghost" className="w-full justify-start text-red-600" onClick={() => navigate("/")}>
-        <LogOut className="mr-2 h-4 w-4" /> Logout
+      <Button variant="ghost" className="w-full justify-start text-red-600" onClick={handleLogout}>
+        <LogOut className="mr-2 h-4 w-4" /> {t("logout")}
       </Button>
     </div>
   );
@@ -112,7 +115,10 @@ const PatientDashboardNew = () => {
             <img src="/logo.png" alt="HealthMR" className="h-10" />
             <span className="font-bold text-medical-green">HealthMR</span>
           </div>
-          <Button variant="ghost" onClick={handleLogout}>Logout</Button>
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+            <Button variant="ghost" onClick={handleLogout}>{t("logout")}</Button>
+          </div>
         </div>
       </header>
 
@@ -124,18 +130,18 @@ const PatientDashboardNew = () => {
             {activeTab === "overview" && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-medical-dark">Welcome, {patientData?.first_name || 'Patient'}</h2>
-                  <p className="text-gray-600">HealthMR ID: {patientData?.healthmr_id || 'Loading...'}</p>
+                  <h2 className="text-2xl font-bold text-medical-dark">{t("welcome")}, {patientData?.first_name || 'Patient'}</h2>
+                  <p className="text-gray-600">{t("healthmrId")}: {patientData?.healthmr_id || t("loading")}</p>
                 </div>
                 <div className="grid sm:grid-cols-3 gap-4">
-                  <StatCard label="Upcoming Visits" value={appointments.length.toString()} />
-                  <StatCard label="Active Prescriptions" value={prescriptions.length.toString()} />
-                  <StatCard label="Lab Tests" value={labTests.length.toString()} />
+                  <StatCard label={t("upcomingVisits")} value={appointments.length.toString()} />
+                  <StatCard label={t("activePrescriptions")} value={prescriptions.length.toString()} />
+                  <StatCard label={t("labTests")} value={labTests.length.toString()} />
                 </div>
                 <Card className="p-6">
-                  <h3 className="font-semibold text-medical-dark mb-4">Recent Activity</h3>
+                  <h3 className="font-semibold text-medical-dark mb-4">{t("recentActivity")}</h3>
                   {!patientData ? (
-                    <p className="text-gray-500 text-sm">Loading...</p>
+                    <p className="text-gray-500 text-sm">{t("loading")}</p>
                   ) : appointments.length > 0 ? (
                     <div className="space-y-3">
                       {appointments.map((apt) => (
@@ -143,7 +149,7 @@ const PatientDashboardNew = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500 text-sm">No recent activity</p>
+                    <p className="text-gray-500 text-sm">{t("noActivity")}</p>
                   )}
                 </Card>
               </div>
@@ -151,7 +157,7 @@ const PatientDashboardNew = () => {
 
             {activeTab === "records" && (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-medical-dark">Medical Records</h2>
+                <h2 className="text-2xl font-bold text-medical-dark">{t("medicalRecords")}</h2>
                 {consultations.length > 0 ? (
                   <div className="space-y-4">
                     {consultations.map((c) => (
@@ -169,14 +175,14 @@ const PatientDashboardNew = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">No medical records available yet. Records will appear here after consultations.</p>
+                  <p className="text-gray-500">{t("noRecords")}</p>
                 )}
               </div>
             )}
 
             {activeTab === "prescriptions" && (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-medical-dark">Prescriptions</h2>
+                <h2 className="text-2xl font-bold text-medical-dark">{t("prescriptions")}</h2>
                 {prescriptions.length > 0 ? (
                   <div className="space-y-4">
                     {prescriptions.map((p) => (
@@ -195,7 +201,7 @@ const PatientDashboardNew = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">No active prescriptions. Prescriptions from consultations will appear here.</p>
+                  <p className="text-gray-500">{t("noPrescriptions")}</p>
                 )}
               </div>
             )}
@@ -203,7 +209,7 @@ const PatientDashboardNew = () => {
             {activeTab === "labs" && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-medical-dark">Lab Results</h2>
+                  <h2 className="text-2xl font-bold text-medical-dark">{t("labResults")}</h2>
                   {patientData && <AddMedicalTestDialog patientId={patientData.id} onSuccess={fetchPatientData} />}
                 </div>
                 {labTests.length > 0 ? (
@@ -227,8 +233,8 @@ const PatientDashboardNew = () => {
                 ) : (
                   <div className="text-center py-8">
                     <TestTube className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-500">No lab results available yet.</p>
-                    <p className="text-sm text-gray-400 mt-1">Add your medical test results using the button above.</p>
+                    <p className="text-gray-500">{t("noLabResults")}</p>
+                    <p className="text-sm text-gray-400 mt-1">{t("addYourTests")}</p>
                   </div>
                 )}
               </div>
@@ -237,8 +243,8 @@ const PatientDashboardNew = () => {
             {activeTab === "appointments" && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-medical-dark">Appointments</h2>
-                  <Button className="bg-medical-green hover:bg-medical-dark" onClick={() => alert('Appointment booking coming soon!')}>Book New</Button>
+                  <h2 className="text-2xl font-bold text-medical-dark">{t("appointments")}</h2>
+                  <Button className="bg-medical-green hover:bg-medical-dark" onClick={() => alert('Appointment booking coming soon!')}>{t("bookNew")}</Button>
                 </div>
                 {appointments.length > 0 ? (
                   appointments.map((apt) => (
@@ -250,7 +256,7 @@ const PatientDashboardNew = () => {
                     />
                   ))
                 ) : (
-                  <p className="text-gray-500">No appointments scheduled</p>
+                  <p className="text-gray-500">{t("noAppointments")}</p>
                 )}
               </div>
             )}

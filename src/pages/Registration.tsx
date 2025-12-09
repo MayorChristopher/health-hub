@@ -44,6 +44,7 @@ const Registration = () => {
           description: "NIN must be exactly 11 digits",
           variant: "destructive"
         });
+        setLoading(false);
         return;
       }
 

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import { LanguageProvider } from "./context/LanguageContext";
 import LandingPro from "./pages/LandingPro";
 import PatientLogin from "./pages/PatientLogin";
 import AdminLogin from "./pages/AdminLogin";
@@ -22,10 +23,11 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+    <LanguageProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
           <Routes>
             <Route path="/" element={<LandingPro />} />
             <Route path="/patient-login" element={<PatientLogin />} />
@@ -41,8 +43,9 @@ const App = () => (
             <Route path="/medical-dashboard" element={<MedicalDashboardNew />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 
