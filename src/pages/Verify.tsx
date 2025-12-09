@@ -32,7 +32,7 @@ const Verify = () => {
       title: "Verification Successful",
       description: "Your identity has been verified.",
     });
-    navigate("/");
+    navigate("/patient-dashboard");
   };
 
   const handleResend = () => {

@@ -56,6 +56,12 @@ export default {
           soft: "hsl(var(--health-green-soft))",
           light: "hsl(var(--health-green-light))",
         },
+        medical: {
+          green: "#0AA15F",
+          gold: "#d4a017",
+          light: "#E8F5F0",
+          dark: "#065F3E",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

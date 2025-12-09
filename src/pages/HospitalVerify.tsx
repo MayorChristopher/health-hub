@@ -33,7 +33,7 @@ const HospitalVerify = () => {
       title: "Verification Successful",
       description: "Hospital staff identity verified. Access granted.",
     });
-    navigate("/");
+    navigate("/medical-dashboard");
   };
 
   const handleResend = () => {
