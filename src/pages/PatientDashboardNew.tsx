@@ -3,15 +3,19 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Activity, FileText, Calendar, Pill, TestTube, LogOut, Menu } from "lucide-react";
+import { Activity, FileText, Calendar, Pill, TestTube, LogOut, Menu, Download } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate } from "react-router-dom";
+import { AddMedicalTestDialog } from "@/components/AddMedicalTestDialog";
 
 const PatientDashboardNew = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [patientData, setPatientData] = useState<any>(null);
   const [appointments, setAppointments] = useState<any[]>([]);
+  const [labTests, setLabTests] = useState<any[]>([]);
+  const [consultations, setConsultations] = useState<any[]>([]);
+  const [prescriptions, setPrescriptions] = useState<any[]>([]);
 
   useEffect(() => {
     fetchPatientData();
@@ -37,8 +41,31 @@ const PatientDashboardNew = () => {
         .from('appointments')
         .select('*')
         .eq('patient_id', patient.id)
+        .order('appointment_date', { ascending: false })
         .limit(5);
       if (appts) setAppointments(appts);
+
+      const { data: labs } = await supabase
+        .from('lab_tests')
+        .select('*')
+        .eq('patient_id', patient.id)
+        .order('completed_at', { ascending: false });
+      if (labs) setLabTests(labs);
+
+      const { data: consults } = await supabase
+        .from('consultations')
+        .select('*')
+        .eq('patient_id', patient.id)
+        .order('consultation_date', { ascending: false });
+      if (consults) setConsultations(consults);
+
+      const { data: presc } = await supabase
+        .from('prescriptions')
+        .select('*')
+        .eq('patient_id', patient.id)
+        .eq('status', 'active')
+        .order('prescribed_at', { ascending: false });
+      if (presc) setPrescriptions(presc);
     }
   };
 
@@ -102,8 +129,8 @@ const PatientDashboardNew = () => {
                 </div>
                 <div className="grid sm:grid-cols-3 gap-4">
                   <StatCard label="Upcoming Visits" value={appointments.length.toString()} />
-                  <StatCard label="Active Prescriptions" value="0" />
-                  <StatCard label="Pending Results" value="0" />
+                  <StatCard label="Active Prescriptions" value={prescriptions.length.toString()} />
+                  <StatCard label="Lab Tests" value={labTests.length.toString()} />
                 </div>
                 <Card className="p-6">
                   <h3 className="font-semibold text-medical-dark mb-4">Recent Activity</h3>
@@ -125,21 +152,85 @@ const PatientDashboardNew = () => {
             {activeTab === "records" && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-medical-dark">Medical Records</h2>
-                <p className="text-gray-500">No medical records available yet. Records will appear here after consultations.</p>
+                {consultations.length > 0 ? (
+                  <div className="space-y-4">
+                    {consultations.map((c) => (
+                      <Card key={c.id} className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <p className="font-semibold text-medical-dark">{c.chief_complaint}</p>
+                            <p className="text-sm text-gray-600 mt-1"><strong>Diagnosis:</strong> {c.diagnosis || 'N/A'}</p>
+                            <p className="text-sm text-gray-600"><strong>Treatment:</strong> {c.treatment_plan || 'N/A'}</p>
+                            <p className="text-xs text-gray-500 mt-2">{new Date(c.consultation_date).toLocaleString()}</p>
+                          </div>
+                          <Button size="sm" variant="outline"><Download className="h-4 w-4" /></Button>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500">No medical records available yet. Records will appear here after consultations.</p>
+                )}
               </div>
             )}
 
             {activeTab === "prescriptions" && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-medical-dark">Prescriptions</h2>
-                <p className="text-gray-500">No active prescriptions. Prescriptions from consultations will appear here.</p>
+                {prescriptions.length > 0 ? (
+                  <div className="space-y-4">
+                    {prescriptions.map((p) => (
+                      <Card key={p.id} className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <p className="font-semibold text-medical-dark">{p.medication_name}</p>
+                            <p className="text-sm text-gray-600"><strong>Dosage:</strong> {p.dosage}</p>
+                            <p className="text-sm text-gray-600"><strong>Frequency:</strong> {p.frequency}</p>
+                            <p className="text-sm text-gray-600"><strong>Duration:</strong> {p.duration}</p>
+                            <p className="text-xs text-gray-500 mt-2">Prescribed: {new Date(p.prescribed_at).toLocaleDateString()}</p>
+                          </div>
+                          <Button size="sm" variant="outline"><Download className="h-4 w-4" /></Button>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500">No active prescriptions. Prescriptions from consultations will appear here.</p>
+                )}
               </div>
             )}
 
             {activeTab === "labs" && (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-medical-dark">Lab Results</h2>
-                <p className="text-gray-500">No lab results available. Test results will appear here when ready.</p>
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-medical-dark">Lab Results</h2>
+                  {patientData && <AddMedicalTestDialog patientId={patientData.id} onSuccess={fetchPatientData} />}
+                </div>
+                {labTests.length > 0 ? (
+                  <div className="space-y-4">
+                    {labTests.map((test) => (
+                      <Card key={test.id} className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <p className="font-semibold text-medical-dark">{test.test_type}</p>
+                            <p className="text-sm text-gray-600 mt-1"><strong>Results:</strong> {test.results}</p>
+                            {test.notes && <p className="text-sm text-gray-600"><strong>Notes:</strong> {test.notes}</p>}
+                            <p className="text-xs text-gray-500 mt-2">
+                              {test.completed_at ? `Completed: ${new Date(test.completed_at).toLocaleDateString()}` : 'Pending'}
+                            </p>
+                          </div>
+                          <Button size="sm" variant="outline"><Download className="h-4 w-4" /></Button>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <TestTube className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-500">No lab results available yet.</p>
+                    <p className="text-sm text-gray-400 mt-1">Add your medical test results using the button above.</p>
+                  </div>
+                )}
               </div>
             )}
 
