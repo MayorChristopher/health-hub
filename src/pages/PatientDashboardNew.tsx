@@ -117,7 +117,9 @@ const PatientDashboardNew = () => {
               <SheetTrigger asChild className="lg:hidden">
                 <Button variant="ghost" size="icon"><Menu /></Button>
               </SheetTrigger>
-              <SheetContent side="left"><Sidebar /></SheetContent>
+              <SheetContent side="left" className="w-[280px] pt-12">
+                <Sidebar />
+              </SheetContent>
             </Sheet>
             <img src="/logo.png" alt="HealthMR" className="h-10" />
             <span className="font-bold text-medical-green">HealthMR</span>

@@ -45,7 +45,9 @@ const MedicalDashboardNew = () => {
               <SheetTrigger asChild className="lg:hidden">
                 <Button variant="ghost" size="icon"><Menu /></Button>
               </SheetTrigger>
-              <SheetContent side="left"><Sidebar /></SheetContent>
+              <SheetContent side="left" className="w-[280px] pt-12">
+                <Sidebar />
+              </SheetContent>
             </Sheet>
             <div className="w-8 h-8 bg-medical-green rounded flex items-center justify-center">
               <Activity className="h-5 w-5 text-white" />
