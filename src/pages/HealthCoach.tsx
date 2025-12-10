@@ -36,29 +36,107 @@ const HealthCoach = () => {
     }
   };
 
-  const generateRecommendations = (patient: any) => {
+  const generateRecommendations = async (patient: any) => {
     const age = new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear();
     
-    const exercises = [
-      { name: "Brisk Walking", sets: "3 sets", duration: "30 mins", icon: "🚶" },
-      { name: "Light Stretching", sets: "2 sets", duration: "10 mins", icon: "🧘" },
-      { name: "Chair Squats", sets: "3 sets", duration: "15 reps", icon: "💪" },
-    ];
+    // Fetch medical history
+    const { data: consultations } = await supabase
+      .from('consultations')
+      .select('*')
+      .eq('patient_id', patient.id)
+      .order('consultation_date', { ascending: false })
+      .limit(5);
 
-    const diet = [
-      { meal: "Breakfast", food: "Oatmeal with Fruits", icon: "🥣" },
-      { meal: "Lunch", food: "Grilled Chicken Salad", icon: "🥗" },
-      { meal: "Dinner", food: "Fish with Steamed Vegetables", icon: "🐟" },
-    ];
+    const { data: labTests } = await supabase
+      .from('lab_tests')
+      .select('*')
+      .eq('patient_id', patient.id)
+      .order('completed_at', { ascending: false })
+      .limit(5);
 
-    const tips = [
-      { text: "Drink 8 glasses of water", type: "positive", icon: "✓" },
-      { text: "Monitor blood pressure", type: "positive", icon: "✓" },
-      { text: "Avoid sugary drinks", type: "negative", icon: "✗" },
-      { text: "Limit salt intake", type: "negative", icon: "✗" },
-    ];
+    // Generate personalized recommendations based on age and medical history
+    let exercises = [];
+    let diet = [];
+    let tips = [];
 
-    setRecommendations({ exercises, diet, tips });
+    // Age-based exercise recommendations
+    if (age < 40) {
+      exercises = [
+        { name: "Jogging", sets: "3 sets", duration: "30 mins", icon: "🏃" },
+        { name: "Push-ups", sets: "3 sets", duration: "15 reps", icon: "💪" },
+        { name: "Jumping Jacks", sets: "2 sets", duration: "20 reps", icon: "🤸" },
+      ];
+    } else if (age < 60) {
+      exercises = [
+        { name: "Brisk Walking", sets: "3 sets", duration: "30 mins", icon: "🚶" },
+        { name: "Light Stretching", sets: "2 sets", duration: "10 mins", icon: "🧘" },
+        { name: "Chair Squats", sets: "3 sets", duration: "15 reps", icon: "💪" },
+      ];
+    } else {
+      exercises = [
+        { name: "Gentle Walking", sets: "2 sets", duration: "20 mins", icon: "🚶" },
+        { name: "Seated Stretching", sets: "2 sets", duration: "10 mins", icon: "🧘" },
+        { name: "Arm Raises", sets: "2 sets", duration: "10 reps", icon: "💪" },
+      ];
+    }
+
+    // Check for diabetes or high blood sugar
+    const hasDiabetes = consultations?.some(c => 
+      c.diagnosis?.toLowerCase().includes('diabetes') || 
+      c.diagnosis?.toLowerCase().includes('sugar')
+    ) || labTests?.some(t => 
+      t.test_type?.toLowerCase().includes('glucose') && 
+      t.results?.toLowerCase().includes('high')
+    );
+
+    // Check for hypertension
+    const hasHypertension = consultations?.some(c => 
+      c.diagnosis?.toLowerCase().includes('hypertension') || 
+      c.diagnosis?.toLowerCase().includes('blood pressure')
+    );
+
+    // Personalized diet based on conditions
+    if (hasDiabetes) {
+      diet = [
+        { meal: "Breakfast", food: "Oatmeal with Nuts (No Sugar)", icon: "🥣" },
+        { meal: "Lunch", food: "Grilled Fish with Vegetables", icon: "🐟" },
+        { meal: "Dinner", food: "Chicken Soup with Greens", icon: "🍲" },
+      ];
+      tips.push(
+        { text: "Monitor blood sugar daily", type: "positive", icon: "✓" },
+        { text: "Avoid all sugary foods", type: "negative", icon: "✗" },
+        { text: "Eat small frequent meals", type: "positive", icon: "✓" }
+      );
+    } else if (hasHypertension) {
+      diet = [
+        { meal: "Breakfast", food: "Banana with Low-fat Yogurt", icon: "🍌" },
+        { meal: "Lunch", food: "Grilled Chicken Salad", icon: "🥗" },
+        { meal: "Dinner", food: "Steamed Fish with Vegetables", icon: "🐟" },
+      ];
+      tips.push(
+        { text: "Monitor blood pressure daily", type: "positive", icon: "✓" },
+        { text: "Limit salt intake strictly", type: "negative", icon: "✗" },
+        { text: "Avoid processed foods", type: "negative", icon: "✗" }
+      );
+    } else {
+      diet = [
+        { meal: "Breakfast", food: "Oatmeal with Fruits", icon: "🥣" },
+        { meal: "Lunch", food: "Grilled Chicken Salad", icon: "🥗" },
+        { meal: "Dinner", food: "Fish with Steamed Vegetables", icon: "🐟" },
+      ];
+    }
+
+    // General health tips
+    if (tips.length === 0) {
+      tips = [
+        { text: "Drink 8 glasses of water", type: "positive", icon: "✓" },
+        { text: "Exercise 30 mins daily", type: "positive", icon: "✓" },
+        { text: "Avoid sugary drinks", type: "negative", icon: "✗" },
+        { text: "Limit alcohol intake", type: "negative", icon: "✗" },
+      ];
+    }
+
+    setRecommendations({ exercises, diet, tips, hasDiabetes, hasHypertension });
   };
 
   return (
@@ -80,6 +158,12 @@ const HealthCoach = () => {
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Good Morning, {patientData?.first_name || 'Patient'}</h2>
           <p className="text-sm text-gray-600 mt-1">Tailored guidance based on your medical history</p>
+          {recommendations?.hasDiabetes && (
+            <Badge className="mt-2 bg-blue-100 text-blue-800">Diabetes Management Plan</Badge>
+          )}
+          {recommendations?.hasHypertension && (
+            <Badge className="mt-2 ml-2 bg-purple-100 text-purple-800">Hypertension Care Plan</Badge>
+          )}
         </div>
 
         {/* Recommended Exercises */}
@@ -99,7 +183,13 @@ const HealthCoach = () => {
               </div>
             ))}
           </div>
-          <Button className="w-full mt-4 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold">
+          <Button 
+            className="w-full mt-4 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold"
+            onClick={() => {
+              const exercises = recommendations?.exercises.map((e: any) => e.name).join(', ');
+              alert(`Starting workout routine:\n\n${exercises}\n\nRemember to:\n- Warm up for 5 minutes\n- Stay hydrated\n- Stop if you feel pain\n\nGood luck!`);
+            }}
+          >
             Start Workout
           </Button>
         </Card>
@@ -118,7 +208,16 @@ const HealthCoach = () => {
               </div>
             ))}
           </div>
-          <Button variant="outline" className="w-full mt-4 border-yellow-400 text-gray-900 hover:bg-yellow-50">
+          <Button 
+            variant="outline" 
+            className="w-full mt-4 border-yellow-400 text-gray-900 hover:bg-yellow-50"
+            onClick={() => {
+              const meals = recommendations?.diet.map((m: any) => `${m.meal}: ${m.food}`).join('\n');
+              const warning = recommendations?.hasDiabetes ? '\n\n⚠️ Diabetic-friendly diet' : 
+                             recommendations?.hasHypertension ? '\n\n⚠️ Low-sodium diet' : '';
+              alert(`Your Full Diet Plan:\n\n${meals}${warning}\n\nNutritional Tips:\n- Eat at regular times\n- Control portion sizes\n- Stay hydrated`);
+            }}
+          >
             View Full Diet Plan
           </Button>
         </Card>
@@ -163,11 +262,20 @@ const HealthCoach = () => {
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-3">
-          <Button variant="outline" className="flex items-center gap-2" onClick={() => navigate("/patient-dashboard")}>
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2" 
+            onClick={() => navigate("/patient-dashboard")}
+          >
             <FileText className="h-4 w-4" />
             Medical Summary
           </Button>
-          <Button className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900">
+          <Button 
+            className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900"
+            onClick={() => {
+              alert('Contact Doctor\n\nEmergency: 112\nHospital Hotline: +234-XXX-XXX-XXXX\n\nYou can also book an appointment from your dashboard.');
+            }}
+          >
             <Phone className="h-4 w-4" />
             Contact Doctor
           </Button>
