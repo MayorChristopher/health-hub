@@ -17,6 +17,7 @@ import HospitalAccess from "./pages/HospitalAccess";
 import HospitalVerify from "./pages/HospitalVerify";
 import PatientDashboardNew from "./pages/PatientDashboardNew";
 import MedicalDashboardNew from "./pages/MedicalDashboardNew";
+import HealthCoach from "./pages/HealthCoach";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/hospital-access" element={<HospitalAccess />} />
             <Route path="/hospital-verify" element={<HospitalVerify />} />
             <Route path="/patient-dashboard" element={<PatientDashboardNew />} />
+            <Route path="/health-coach" element={<HealthCoach />} />
             <Route path="/medical-dashboard" element={<MedicalDashboardNew />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

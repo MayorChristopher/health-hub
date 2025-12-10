@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Activity, FileText, Calendar, Pill, TestTube, LogOut, Menu, Download } from "lucide-react";
+import { Activity, FileText, Calendar, Pill, TestTube, LogOut, Menu, Download, Heart } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate } from "react-router-dom";
 import { AddMedicalTestDialog } from "@/components/AddMedicalTestDialog";
@@ -79,6 +79,13 @@ const PatientDashboardNew = () => {
 
   const Sidebar = () => (
     <div className="space-y-1">
+      <Button
+        variant="default"
+        className="w-full justify-start bg-yellow-400 hover:bg-yellow-500 text-gray-900 mb-3"
+        onClick={() => navigate('/health-coach')}
+      >
+        <Heart className="mr-2 h-4 w-4" /> Health Coach
+      </Button>
       {[
         { id: "overview", icon: Activity, label: t("overview") },
         { id: "records", icon: FileText, label: t("medicalRecords") },
@@ -115,10 +122,7 @@ const PatientDashboardNew = () => {
             <img src="/logo.png" alt="HealthMR" className="h-10" />
             <span className="font-bold text-medical-green">HealthMR</span>
           </div>
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher />
-            <Button variant="ghost" onClick={handleLogout}>{t("logout")}</Button>
-          </div>
+          <LanguageSwitcher />
         </div>
       </header>
 

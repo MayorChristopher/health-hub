@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Shield, Clock, Database, Users, CheckCircle, ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const LandingPro = () => {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ const LandingPro = () => {
             <span className="text-xl font-bold text-medical-green hidden sm:block">HealthMR</span>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
+            <LanguageSwitcher />
             <Button variant="ghost" onClick={() => navigate("/patient-login")} className="text-sm md:text-base">Patient Login</Button>
             <Button variant="ghost" onClick={() => navigate("/staff-login")} className="text-sm md:text-base">Staff</Button>
             <Button onClick={() => navigate("/register")} className="bg-medical-green hover:bg-medical-dark text-sm md:text-base">
