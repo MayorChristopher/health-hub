@@ -21,7 +21,7 @@ export default function AdminSetup() {
   });
 
   // CRITICAL: Change this secret key to your own unique value
-  const SETUP_SECRET_KEY = 'HEALTHMR_ADMIN_SETUP_2025_SECURE';
+  const SETUP_SECRET_KEY = 'HMR-ADMIN-01';
 
   const handleSetup = async (e: React.FormEvent) => {
     e.preventDefault();

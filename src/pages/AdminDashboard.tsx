@@ -376,7 +376,20 @@ const AdminDashboard = () => {
           <TabsContent value="settings">
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4">System Settings</h3>
-              <p className="text-gray-600">Configure system-wide settings and preferences</p>
+              <p className="text-gray-600 mb-6">Configure system-wide settings and preferences</p>
+              
+              <div className="space-y-4">
+                <div className="border-t pt-4">
+                  <h4 className="font-semibold mb-2">Admin Management</h4>
+                  <Button 
+                    onClick={() => navigate('/admin/create-user')}
+                    className="bg-medical-green hover:bg-medical-dark"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Create New Admin Account
+                  </Button>
+                </div>
+              </div>
             </Card>
           </TabsContent>
         </Tabs>

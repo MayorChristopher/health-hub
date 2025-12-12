@@ -9,6 +9,7 @@ import LandingPro from "./pages/LandingPro";
 import PatientLogin from "./pages/PatientLogin";
 import AdminLogin from "./pages/AdminLogin";
 import AdminSetup from "./pages/AdminSetup";
+import AdminCreateUser from "./pages/AdminCreateUser";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminEditPatient from "./pages/AdminEditPatient";
 import AdminVerifyStaff from "./pages/AdminVerifyStaff";
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/patient-login" element={<PatientLogin />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin-setup" element={<AdminSetup />} />
+            <Route path="/admin/create-user" element={<AdminCreateUser />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/admin/edit-patient/:patientId" element={<AdminEditPatient />} />
             <Route path="/admin/verify-staff" element={<AdminVerifyStaff />} />
