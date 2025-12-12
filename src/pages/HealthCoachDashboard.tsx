@@ -18,16 +18,17 @@ export default function HealthCoachDashboard() {
   }, []);
 
   const loadPatientData = async () => {
-    const patientId = localStorage.getItem('patientId');
-    if (!patientId) {
-      navigate('/');
+    const session = localStorage.getItem('patient_session');
+    if (!session) {
+      navigate('/patient-login');
       return;
     }
 
+    const { id } = JSON.parse(session);
     const { data } = await supabase
       .from('patients')
       .select('*, consultations(*), prescriptions(*)')
-      .eq('id', patientId)
+      .eq('id', id)
       .single();
 
     setPatientData(data);
@@ -172,7 +173,7 @@ export default function HealthCoachDashboard() {
       {/* Fixed Bottom Actions */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-4 flex gap-3">
         <button 
-          onClick={() => navigate('/patient-record/' + localStorage.getItem('patientId'))}
+          onClick={() => patientData && navigate('/patient-record/' + patientData.id)}
           className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-gray-800 transition"
         >
           <FileText className="w-4 h-4" />

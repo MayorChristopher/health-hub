@@ -19,50 +19,40 @@ const PatientLogin = () => {
     setLoading(true);
     
     try {
-      // Find patient by HealthMR ID and NIN
+      // Find patient by HealthMR ID only
       const { data: patient, error: findError } = await supabase
         .from('patients')
         .select('*')
         .eq('healthmr_id', healthmrId.toUpperCase())
-        .eq('nin', nin)
         .single();
 
       if (findError || !patient) {
         toast({
           title: "Login Failed",
-          description: "Invalid HealthMR ID or NIN. Please check your credentials.",
+          description: "Invalid HealthMR ID. Please check your credentials.",
           variant: "destructive"
         });
         setLoading(false);
         return;
       }
 
-      // Check if user_id exists (account created)
-      if (!patient.user_id) {
-        toast({
-          title: "Account Setup Required",
-          description: "Please contact hospital admin to complete your account setup.",
-          variant: "destructive"
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Sign in with their email and auto-generated password
-      const { error } = await supabase.auth.signInWithPassword({
-        email: patient.email,
-        password: nin + "@HealthMR",
-      });
-
-      if (error) {
+      // Verify NIN if patient has one
+      if (patient.nin && patient.nin !== nin) {
         toast({
           title: "Login Failed",
-          description: "Authentication error. Please try again or contact support.",
+          description: "Invalid NIN. Please check your credentials.",
           variant: "destructive"
         });
         setLoading(false);
         return;
       }
+
+      // Store patient session
+      localStorage.setItem('patient_session', JSON.stringify({
+        id: patient.id,
+        healthmr_id: patient.healthmr_id,
+        name: `${patient.first_name} ${patient.last_name}`,
+      }));
 
       toast({
         title: "Login Successful",

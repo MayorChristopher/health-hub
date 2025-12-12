@@ -73,19 +73,8 @@ const Registration = () => {
         }
       }
 
-      // Create auth user only if email is provided
+      // Skip Supabase auth - patients login with HealthMR ID only
       let userId = null;
-      if (formData.email) {
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.nin || formData.dob.replace(/-/g, '') + "@HealthMR",
-        });
-        if (authError) {
-          console.warn("Auth creation failed, continuing with registration:", authError);
-        } else {
-          userId = authData.user?.id;
-        }
-      }
 
       // Generate Temporary ID if no NIN (DOB-based algorithm)
       let tempId = null;
@@ -128,6 +117,13 @@ const Registration = () => {
         .single();
 
       if (dbError) throw dbError;
+
+      // Store patient session
+      localStorage.setItem('patient_session', JSON.stringify({
+        id: patientData.id,
+        healthmr_id: patientData.healthmr_id,
+        name: `${patientData.first_name} ${patientData.last_name}`,
+      }));
 
       setLoading(false);
       setRegisteredId(patientData.healthmr_id);

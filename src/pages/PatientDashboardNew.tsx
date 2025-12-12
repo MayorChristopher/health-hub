@@ -27,16 +27,17 @@ const PatientDashboardNew = () => {
   }, []);
 
   const fetchPatientData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    const session = localStorage.getItem('patient_session');
+    if (!session) {
       navigate('/patient-login');
       return;
     }
 
+    const { id } = JSON.parse(session);
     const { data: patient } = await supabase
       .from('patients')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('id', id)
       .single();
     
     if (patient) {
@@ -82,7 +83,7 @@ const PatientDashboardNew = () => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem('patient_session');
     navigate('/');
   };
 
