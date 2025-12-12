@@ -57,11 +57,6 @@ const AdminLogin = () => {
         role: admin.role || 'admin',
       }));
 
-      toast({
-        title: 'Login Successful',
-        description: `Welcome back, ${admin.full_name}`,
-      });
-
       navigate("/admin-dashboard");
     } catch (error) {
       console.error('Login error:', error);

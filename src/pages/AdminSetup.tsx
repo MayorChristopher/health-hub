@@ -91,11 +91,6 @@ export default function AdminSetup() {
       return;
     }
 
-    toast({
-      title: 'Admin Account Created',
-      description: 'You can now login with your credentials',
-    });
-
     navigate('/admin');
   };
 
