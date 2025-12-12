@@ -61,7 +61,7 @@ export default function HealthCoachDashboard() {
           <div>
             <p className="text-sm text-gray-700">{greeting},</p>
             <h1 className="text-2xl font-bold text-gray-900">
-              {patientData?.full_name?.split(' ')[0] || 'User'}
+              {patientData?.first_name || 'User'}
             </h1>
           </div>
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md">
