@@ -266,6 +266,7 @@ const LandingPro = () => {
                 <li><button onClick={() => navigate("/data-protection")} className="hover:text-white transition">Data Protection</button></li>
                 <li><a href="https://www.instagram.com/health_mr4" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Instagram: @health_mr4</a></li>
                 <li><a href="https://www.tiktok.com/@health_mr" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">TikTok: @health_mr</a></li>
+                <li><a href="https://www.facebook.com/share/1DBUDHekpR/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Facebook</a></li>
               </ul>
             </div>
           </div>

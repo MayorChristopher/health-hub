@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Activity, Apple, CheckCircle, XCircle, Calendar, Phone, FileText, Fingerprint } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 
 export default function HealthCoachDashboard() {
   const navigate = useNavigate();
