@@ -18,6 +18,7 @@ const About = () => {
 
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-12 space-y-12">
         <div className="text-center">
+          <img src="/logo.png" alt="HealthMR" className="h-20 md:h-24 mx-auto mb-6" />
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">About HealthMR</h1>
           <p className="text-xl text-gray-600">Transforming Healthcare in Abia State</p>
         </div>

@@ -116,7 +116,7 @@ const Terms = () => {
               <br />
               Email: legal@healthmr.ng
               <br />
-              Phone: +234-XXX-XXX-XXXX
+              Phone: +234 912 329 7491
             </p>
           </section>
         </div>

@@ -91,7 +91,7 @@ const Privacy = () => {
               <br />
               Email: privacy@healthmr.ng
               <br />
-              Phone: +234-XXX-XXX-XXXX
+              Phone: +234 912 329 7491
             </p>
           </section>
         </div>

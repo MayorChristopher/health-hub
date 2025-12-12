@@ -254,7 +254,7 @@ const LandingPro = () => {
                 <li><button onClick={() => navigate("/about")} className="hover:text-white transition">About HealthMR</button></li>
                 <li><button onClick={() => navigate("/contact")} className="hover:text-white transition">Contact Us</button></li>
                 <li className="text-gray-400">Email: info@healthmr.ng</li>
-                <li className="text-gray-400">Phone: +234-XXX-XXX-XXXX</li>
+                <li className="text-gray-400">Phone: +234 912 329 7491</li>
                 <li className="text-gray-400">Location: Abia State, Nigeria</li>
               </ul>
             </div>
@@ -264,8 +264,8 @@ const LandingPro = () => {
                 <li><button onClick={() => navigate("/privacy")} className="hover:text-white transition">Privacy Policy</button></li>
                 <li><button onClick={() => navigate("/terms")} className="hover:text-white transition">Terms of Service</button></li>
                 <li><button onClick={() => navigate("/data-protection")} className="hover:text-white transition">Data Protection</button></li>
-                <li className="text-gray-400">Twitter: @HealthMR_NG</li>
-                <li className="text-gray-400">LinkedIn: HealthMR Nigeria</li>
+                <li><a href="https://www.instagram.com/health_mr4" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Instagram: @health_mr4</a></li>
+                <li><a href="https://www.tiktok.com/@health_mr" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">TikTok: @health_mr</a></li>
               </ul>
             </div>
           </div>
