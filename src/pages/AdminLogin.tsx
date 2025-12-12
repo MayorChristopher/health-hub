@@ -54,7 +54,7 @@ const AdminLogin = () => {
         id: admin.id,
         username: admin.username,
         fullName: admin.full_name,
-        role: admin.role,
+        role: admin.role || 'admin',
       }));
 
       toast({

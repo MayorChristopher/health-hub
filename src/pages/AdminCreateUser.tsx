@@ -51,7 +51,6 @@ export default function AdminCreateUser() {
       password_hash: hashedPassword,
       full_name: formData.fullName,
       email: formData.email,
-      role: formData.role,
     });
 
     if (error) {

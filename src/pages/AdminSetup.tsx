@@ -80,7 +80,6 @@ export default function AdminSetup() {
       password_hash: hashedPassword,
       full_name: formData.fullName,
       email: formData.email,
-      role: 'super_admin',
     });
 
     if (error) {
