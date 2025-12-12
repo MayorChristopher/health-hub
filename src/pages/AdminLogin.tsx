@@ -37,17 +37,6 @@ const AdminLogin = () => {
         return;
       }
 
-      // Check if admin is active
-      if (!admin.is_active) {
-        toast({
-          title: 'Account Disabled',
-          description: 'Your admin account has been disabled',
-          variant: 'destructive',
-        });
-        setLoading(false);
-        return;
-      }
-
       // Verify password
       const passwordMatch = await bcrypt.compare(password, admin.password_hash);
       if (!passwordMatch) {

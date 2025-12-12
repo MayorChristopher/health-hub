@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS admins (
   full_name VARCHAR(100) NOT NULL,
   email VARCHAR(100) UNIQUE NOT NULL,
   role VARCHAR(20) DEFAULT 'admin',
-  is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW(),
   last_login TIMESTAMP
 );

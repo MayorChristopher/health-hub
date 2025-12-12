@@ -52,7 +52,6 @@ export default function AdminCreateUser() {
       full_name: formData.fullName,
       email: formData.email,
       role: formData.role,
-      is_active: true,
     });
 
     if (error) {

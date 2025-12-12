@@ -81,7 +81,6 @@ export default function AdminSetup() {
       full_name: formData.fullName,
       email: formData.email,
       role: 'super_admin',
-      is_active: true,
     });
 
     if (error) {
