@@ -253,7 +253,7 @@ const LandingPro = () => {
               <ul className="space-y-2 text-xs md:text-sm text-gray-400">
                 <li><button onClick={() => navigate("/about")} className="hover:text-white transition">About HealthMR</button></li>
                 <li><button onClick={() => navigate("/contact")} className="hover:text-white transition">Contact Us</button></li>
-                <li className="text-gray-400">Email: info@healthmr.ng</li>
+                <li className="text-gray-400">Email: healthmrmouau@gmail.com</li>
                 <li className="text-gray-400">Phone: +234 912 329 7491</li>
                 <li className="text-gray-400">Location: Abia State, Nigeria</li>
               </ul>

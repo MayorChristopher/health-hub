@@ -89,7 +89,7 @@ const Privacy = () => {
             <p className="text-gray-700 leading-relaxed">
               For privacy-related questions or concerns, contact us at:
               <br />
-              Email: privacy@healthmr.ng
+              Email: healthmrmouau@gmail.com
               <br />
               Phone: +234 912 329 7491
             </p>

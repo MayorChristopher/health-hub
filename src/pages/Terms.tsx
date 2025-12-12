@@ -114,7 +114,7 @@ const Terms = () => {
             <p className="text-gray-700 leading-relaxed">
               For questions about these terms, contact us at:
               <br />
-              Email: legal@healthmr.ng
+              Email: healthmrmouau@gmail.com
               <br />
               Phone: +234 912 329 7491
             </p>

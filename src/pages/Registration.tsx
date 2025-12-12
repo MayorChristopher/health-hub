@@ -69,13 +69,19 @@ const Registration = () => {
         }
       }
 
-      // Create auth user with proper password
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.nin + "@HealthMR", // Make password meet requirements
-      });
-
-      if (authError) throw authError;
+      // Create auth user only if email is provided
+      let userId = null;
+      if (formData.email) {
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.nin || formData.dob.replace(/-/g, '') + "@HealthMR",
+        });
+        if (authError) {
+          console.warn("Auth creation failed, continuing with registration:", authError);
+        } else {
+          userId = authData.user?.id;
+        }
+      }
 
       // Generate Temporary ID if no NIN (DOB-based algorithm)
       let tempId = null;
@@ -91,10 +97,10 @@ const Registration = () => {
       }
 
       // Create patient record
-      const { error: dbError } = await supabase
+      const { data: patientData, error: dbError } = await supabase
         .from('patients')
         .insert([{
-          user_id: authData.user?.id,
+          user_id: userId,
           first_name: formData.firstName,
           last_name: formData.lastName,
           nin: formData.hasNoNIN ? null : formData.nin,
@@ -113,25 +119,32 @@ const Registration = () => {
           next_of_kin_phone: formData.nextOfKinPhone,
           uses_herbal_medicine: formData.usesHerbalMedicine,
           herbal_types: formData.herbalTypes
-        }]);
+        }])
+        .select()
+        .single();
 
       if (dbError) throw dbError;
-
-      // Get the generated HealthMR ID
-      const { data: newPatient } = await supabase
-        .from('patients')
-        .select('healthmr_id, first_name')
-        .eq('user_id', authData.user?.id)
-        .single();
 
       const statusMessage = recordStatus === 'provisional' 
         ? " (PROVISIONAL - Please provide NIN to verify your record)"
         : "";
 
+      // Show success with ID prominently
+      setLoading(false);
+      
+      // Display ID in alert dialog
+      alert(
+        `✅ REGISTRATION SUCCESSFUL!\n\n` +
+        `Your HealthMR ID: ${patientData.healthmr_id}\n\n` +
+        `${statusMessage}\n\n` +
+        `IMPORTANT: Save this ID now! You will need it to login.\n\n` +
+        `Click OK to continue to your dashboard.`
+      );
+      
       toast({
         title: "Registration Successful!",
-        description: `Your HealthMR ID: ${newPatient?.healthmr_id}${statusMessage}. Save this for login.`,
-        duration: 10000,
+        description: `Your HealthMR ID: ${patientData.healthmr_id}${statusMessage}`,
+        duration: 15000,
       });
       
       navigate("/patient-dashboard");

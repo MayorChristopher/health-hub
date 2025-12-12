@@ -164,7 +164,38 @@ CREATE POLICY "Allow all on self_reported_vitals" ON self_reported_vitals FOR AL
 CREATE POLICY "Allow all on audit_log" ON audit_log FOR ALL USING (true);
 
 -- ============================================
--- STEP 8: Add user_id column to patients (if missing)
+-- STEP 8: Add MDCN verification fields to medical_staff
+-- ============================================
+
+DO $$ 
+BEGIN
+  -- Add mdcn_number column
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                 WHERE table_name='medical_staff' AND column_name='mdcn_number') THEN
+    ALTER TABLE medical_staff ADD COLUMN mdcn_number VARCHAR(50);
+  END IF;
+
+  -- Add license_expiry column
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                 WHERE table_name='medical_staff' AND column_name='license_expiry') THEN
+    ALTER TABLE medical_staff ADD COLUMN license_expiry DATE;
+  END IF;
+
+  -- Add verification_notes column
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                 WHERE table_name='medical_staff' AND column_name='verification_notes') THEN
+    ALTER TABLE medical_staff ADD COLUMN verification_notes TEXT;
+  END IF;
+
+  -- Add verified_at column
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                 WHERE table_name='medical_staff' AND column_name='verified_at') THEN
+    ALTER TABLE medical_staff ADD COLUMN verified_at TIMESTAMP;
+  END IF;
+END $$;
+
+-- ============================================
+-- STEP 9: Add user_id column to patients (if missing)
 -- ============================================
 
 DO $$ 

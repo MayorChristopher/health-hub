@@ -42,9 +42,10 @@ const StaffLogin = () => {
       // Check if account is active
       if (!staff.is_active) {
         toast({
-          title: "Account Inactive",
-          description: "Your account has been deactivated. Contact administrator.",
+          title: "Account Pending Verification",
+          description: "Your account is awaiting admin verification of your medical license (MDCN registration). Contact administrator for status.",
           variant: "destructive",
+          duration: 10000,
         });
         setLoading(false);
         return;

@@ -60,23 +60,36 @@ const StaffRegistration = () => {
           phone: formData.phone,
           email: formData.email,
           password_hash: passwordHash,
-          is_active: true,
+          is_active: false,
         })
         .select()
         .single();
 
       if (error) throw error;
 
+      // Show Staff ID prominently
+      setLoading(false);
+      
+      // Display ID in alert dialog
+      alert(
+        `✅ REGISTRATION SUBMITTED!\n\n` +
+        `Your Staff ID: ${data.staff_id}\n\n` +
+        `IMPORTANT: Save this ID now! You will need it to login.\n\n` +
+        `⚠️ Your account requires admin verification of your MDCN license before activation.\n\n` +
+        `You will be notified once approved.\n\n` +
+        `Click OK to go to login page.`
+      );
+      
       toast({
-        title: "Registration Successful!",
-        description: `Your Staff ID: ${data.staff_id}. Save this for login.`,
-        duration: 10000,
+        title: "Registration Submitted!",
+        description: `Your Staff ID: ${data.staff_id}. Awaiting admin verification.`,
+        duration: 15000,
       });
 
-      // Navigate to login after 2 seconds
+      // Navigate to login after 3 seconds
       setTimeout(() => {
         navigate("/staff-login");
-      }, 2000);
+      }, 3000);
     } catch (error: any) {
       toast({
         title: "Registration Failed",
@@ -194,8 +207,9 @@ const StaffRegistration = () => {
 
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <p className="text-sm text-yellow-800">
-                <strong>Note:</strong> After registration, you will receive a unique Staff ID. 
-                Save this ID as you'll need it to login. Your account will be activated immediately.
+                <strong>⚠️ Verification Required:</strong> After registration, you will receive a unique Staff ID. 
+                Your account requires admin verification of your medical license (MDCN registration) before activation. 
+                This is mandatory under the Medical and Dental Practitioners Act. You will be notified once approved.
               </p>
             </div>
 
