@@ -27,8 +27,13 @@ const AdminVerifyStaff = () => {
   }, []);
 
   const checkAuth = () => {
-    const admin = localStorage.getItem("admin_session");
-    if (!admin) {
+    const session = localStorage.getItem("admin_session");
+    if (!session) {
+      toast({
+        title: "Unauthorized",
+        description: "Please login as admin first",
+        variant: "destructive",
+      });
       navigate("/admin");
     }
   };
@@ -53,49 +58,67 @@ const AdminVerifyStaff = () => {
       return;
     }
 
-    const { error } = await supabase
-      .from("medical_staff")
-      .update({
-        is_active: true,
-        mdcn_number: verificationData.mdcnNumber,
-        license_expiry: verificationData.licenseExpiry,
-        verification_notes: verificationData.verificationNotes,
-        verified_at: new Date().toISOString(),
-      })
-      .eq("id", selectedStaff.id);
+    try {
+      const { error } = await supabase
+        .from("medical_staff")
+        .update({
+          is_active: true,
+          mdcn_number: verificationData.mdcnNumber,
+          license_expiry: verificationData.licenseExpiry || null,
+          verification_notes: verificationData.verificationNotes || null,
+          verified_at: new Date().toISOString(),
+        })
+        .eq("id", selectedStaff.id);
 
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-      return;
+      if (error) {
+        console.error('Approval error:', error);
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+        return;
+      }
+
+      toast({
+        title: "✅ Staff Approved",
+        description: `${selectedStaff.full_name} can now access patient records`,
+      });
+
+      setSelectedStaff(null);
+      setVerificationData({ mdcnNumber: '', licenseExpiry: '', verificationNotes: '' });
+      fetchPendingStaff();
+    } catch (error) {
+      console.error('Approval error:', error);
+      toast({ title: "Error", description: "Failed to approve staff", variant: "destructive" });
     }
-
-    toast({
-      title: "Staff Approved",
-      description: `${selectedStaff.full_name} can now access the system`,
-    });
-
-    setSelectedStaff(null);
-    fetchPendingStaff();
   };
 
   const handleReject = async () => {
-    const { error } = await supabase
-      .from("medical_staff")
-      .delete()
-      .eq("id", selectedStaff.id);
-
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    if (!confirm(`Are you sure you want to reject ${selectedStaff.full_name}'s registration?`)) {
       return;
     }
 
-    toast({
-      title: "Registration Rejected",
-      description: "Staff registration has been removed",
-    });
+    try {
+      const { error } = await supabase
+        .from("medical_staff")
+        .delete()
+        .eq("id", selectedStaff.id);
 
-    setSelectedStaff(null);
-    fetchPendingStaff();
+      if (error) {
+        console.error('Rejection error:', error);
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+        return;
+      }
+
+      toast({
+        title: "❌ Registration Rejected",
+        description: "Staff registration has been removed",
+      });
+
+      setSelectedStaff(null);
+      setVerificationData({ mdcnNumber: '', licenseExpiry: '', verificationNotes: '' });
+      fetchPendingStaff();
+    } catch (error) {
+      console.error('Rejection error:', error);
+      toast({ title: "Error", description: "Failed to reject staff", variant: "destructive" });
+    }
   };
 
   return (

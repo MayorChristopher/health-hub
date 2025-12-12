@@ -5,16 +5,85 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { toast } from "@/hooks/use-toast";
+import bcrypt from "bcryptjs";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement admin authentication
-    navigate("/admin-dashboard");
+    setLoading(true);
+
+    try {
+      // Fetch admin by username
+      const { data: admin, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('username', username)
+        .single();
+
+      if (error || !admin) {
+        toast({
+          title: 'Login Failed',
+          description: 'Invalid username or password',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Check if admin is active
+      if (!admin.is_active) {
+        toast({
+          title: 'Account Disabled',
+          description: 'Your admin account has been disabled',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Verify password
+      const passwordMatch = await bcrypt.compare(password, admin.password_hash);
+      if (!passwordMatch) {
+        toast({
+          title: 'Login Failed',
+          description: 'Invalid username or password',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Store admin session
+      localStorage.setItem('admin_session', JSON.stringify({
+        id: admin.id,
+        username: admin.username,
+        fullName: admin.full_name,
+        role: admin.role,
+      }));
+
+      toast({
+        title: 'Login Successful',
+        description: `Welcome back, ${admin.full_name}`,
+      });
+
+      navigate("/admin-dashboard");
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: 'Error',
+        description: 'An error occurred during login',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,10 +119,27 @@ const AdminLogin = () => {
               required 
             />
           </div>
-          <Button type="submit" className="w-full bg-medical-green hover:bg-medical-dark">
-            Login as Admin
+          <Button 
+            type="submit" 
+            className="w-full bg-medical-green hover:bg-medical-dark"
+            disabled={loading}
+          >
+            {loading ? 'Logging in...' : 'Login as Admin'}
           </Button>
         </form>
+
+        <div className="mt-4 text-center">
+          <p className="text-xs text-gray-500">
+            First time setup?{' '}
+            <button
+              type="button"
+              onClick={() => navigate('/admin-setup')}
+              className="text-medical-green hover:underline"
+            >
+              Create Admin Account
+            </button>
+          </p>
+        </div>
       </Card>
     </div>
   );

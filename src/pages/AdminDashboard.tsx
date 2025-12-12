@@ -16,10 +16,21 @@ const AdminDashboard = () => {
   const [staff, setStaff] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalPatients: 0, totalStaff: 0, totalConsultations: 0, totalLabTests: 0 });
   const [loading, setLoading] = useState(true);
+  const [adminData, setAdminData] = useState<any>(null);
 
   useEffect(() => {
+    checkAuth();
     fetchData();
   }, []);
+
+  const checkAuth = () => {
+    const session = localStorage.getItem('admin_session');
+    if (!session) {
+      navigate('/admin');
+      return;
+    }
+    setAdminData(JSON.parse(session));
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -71,15 +82,77 @@ const AdminDashboard = () => {
     s.role?.toLowerCase().includes(staffSearchTerm.toLowerCase())
   );
 
+  const handleDeletePatient = async (patientId: string) => {
+    if (!confirm('Are you sure you want to delete this patient? This action cannot be undone.')) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from('patients')
+      .delete()
+      .eq('id', patientId);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    toast({ title: "Patient Deleted", description: "Patient record has been removed" });
+    fetchData();
+  };
+
+  const handleToggleStaffStatus = async (staffId: string, currentStatus: boolean) => {
+    const { error } = await supabase
+      .from('medical_staff')
+      .update({ is_active: !currentStatus })
+      .eq('id', staffId);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    toast({ 
+      title: "Status Updated", 
+      description: `Staff ${!currentStatus ? 'activated' : 'deactivated'} successfully` 
+    });
+    fetchData();
+  };
+
+  const handleDeleteStaff = async (staffId: string) => {
+    if (!confirm('Are you sure you want to delete this staff member? This action cannot be undone.')) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from('medical_staff')
+      .delete()
+      .eq('id', staffId);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    toast({ title: "Staff Deleted", description: "Staff member has been removed" });
+    fetchData();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="HealthMR" className="h-10" />
-            <span className="font-semibold">Admin Dashboard</span>
+            <div>
+              <span className="font-semibold">Admin Dashboard</span>
+              {adminData && <p className="text-xs text-gray-600">{adminData.fullName} ({adminData.role})</p>}
+            </div>
           </div>
-          <Button variant="outline" onClick={() => navigate("/")}>Logout</Button>
+          <Button variant="outline" onClick={() => {
+            localStorage.removeItem('admin_session');
+            navigate('/');
+          }}>Logout</Button>
         </div>
       </header>
 
@@ -187,7 +260,14 @@ const AdminDashboard = () => {
                           <td className="py-3 text-sm text-gray-600">
                             {new Date(patient.created_at).toLocaleDateString()}
                           </td>
-                          <td className="py-3 text-right">
+                          <td className="py-3 text-right space-x-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => navigate(`/patient-record/${patient.id}`)}
+                            >
+                              View
+                            </Button>
                             <Button 
                               size="sm" 
                               variant="outline"
@@ -195,6 +275,13 @@ const AdminDashboard = () => {
                             >
                               <Edit className="h-4 w-4 mr-1" />
                               Edit
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="destructive"
+                              onClick={() => handleDeletePatient(patient.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </td>
                         </tr>
@@ -241,6 +328,7 @@ const AdminDashboard = () => {
                         <th className="text-left py-3">Hospital ID</th>
                         <th className="text-left py-3">Phone</th>
                         <th className="text-left py-3">Status</th>
+                        <th className="text-right py-3">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -259,6 +347,22 @@ const AdminDashboard = () => {
                             }`}>
                               {member.is_active ? 'Active' : 'Inactive'}
                             </span>
+                          </td>
+                          <td className="py-3 text-right space-x-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleToggleStaffStatus(member.id, member.is_active)}
+                            >
+                              {member.is_active ? 'Deactivate' : 'Activate'}
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="destructive"
+                              onClick={() => handleDeleteStaff(member.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </td>
                         </tr>
                       ))}

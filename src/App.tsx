@@ -8,6 +8,7 @@ import { LanguageProvider } from "./context/LanguageContext";
 import LandingPro from "./pages/LandingPro";
 import PatientLogin from "./pages/PatientLogin";
 import AdminLogin from "./pages/AdminLogin";
+import AdminSetup from "./pages/AdminSetup";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminEditPatient from "./pages/AdminEditPatient";
 import AdminVerifyStaff from "./pages/AdminVerifyStaff";
@@ -22,6 +23,8 @@ import PatientDashboardNew from "./pages/PatientDashboardNew";
 import MedicalDashboardNew from "./pages/MedicalDashboardNew";
 import PatientRecordView from "./pages/PatientRecordView";
 import HealthCoach from "./pages/HealthCoach";
+import HealthCoachDashboard from "./pages/HealthCoachDashboard";
+import EmergencyAccess from "./pages/EmergencyAccess";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
@@ -42,6 +45,7 @@ const App = () => (
             <Route path="/" element={<LandingPro />} />
             <Route path="/patient-login" element={<PatientLogin />} />
             <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin-setup" element={<AdminSetup />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/admin/edit-patient/:patientId" element={<AdminEditPatient />} />
             <Route path="/admin/verify-staff" element={<AdminVerifyStaff />} />
@@ -54,7 +58,8 @@ const App = () => (
             <Route path="/hospital-verify" element={<HospitalVerify />} />
             <Route path="/patient-dashboard" element={<PatientDashboardNew />} />
             <Route path="/patient-record/:patientId" element={<PatientRecordView />} />
-            <Route path="/health-coach" element={<HealthCoach />} />
+            <Route path="/health-coach" element={<HealthCoachDashboard />} />
+            <Route path="/emergency-access" element={<EmergencyAccess />} />
             <Route path="/medical-dashboard" element={<MedicalDashboardNew />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
