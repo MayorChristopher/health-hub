@@ -201,6 +201,7 @@ const MedicalDashboardNew = () => {
                       key={patient.id}
                       name={`${patient.first_name} ${patient.last_name}`}
                       id={patient.healthmr_id}
+                      patientId={patient.id}
                       lastVisit={new Date(patient.created_at).toLocaleDateString()}
                     />
                   ))
@@ -268,15 +269,24 @@ const ScheduleItem = ({ patient, type, time }: { patient: string; type: string; 
   </div>
 );
 
-const PatientCard = ({ name, id, lastVisit }: { name: string; id: string; lastVisit: string }) => (
-  <Card className="p-4 flex justify-between items-center">
-    <div>
-      <p className="font-medium text-gray-900">{name}</p>
-      <p className="text-sm text-gray-500">{id} • Last visit: {lastVisit}</p>
-    </div>
-    <Button size="sm" className="bg-medical-green hover:bg-medical-dark">View Records</Button>
-  </Card>
-);
+const PatientCard = ({ name, id, lastVisit, patientId }: { name: string; id: string; lastVisit: string; patientId?: string }) => {
+  const navigate = useNavigate();
+  return (
+    <Card className="p-4 flex justify-between items-center">
+      <div>
+        <p className="font-medium text-gray-900">{name}</p>
+        <p className="text-sm text-gray-500">{id} • Last visit: {lastVisit}</p>
+      </div>
+      <Button 
+        size="sm" 
+        className="bg-medical-green hover:bg-medical-dark"
+        onClick={() => patientId && navigate(`/patient-record/${patientId}`)}
+      >
+        View Records
+      </Button>
+    </Card>
+  );
+};
 
 const LabCard = ({ patient, test, status, date }: { patient: string; test: string; status: string; date: string }) => (
   <Card className="p-4 flex justify-between items-center">

@@ -111,6 +111,37 @@ BEGIN
                  WHERE table_name='consultations' AND column_name='digital_signature') THEN
     ALTER TABLE consultations ADD COLUMN digital_signature TEXT;
   END IF;
+
+  -- Add signed_by_staff_id column
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                 WHERE table_name='consultations' AND column_name='signed_by_staff_id') THEN
+    ALTER TABLE consultations ADD COLUMN signed_by_staff_id UUID REFERENCES medical_staff(id);
+  END IF;
+
+  -- Add signed_at column
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                 WHERE table_name='consultations' AND column_name='signed_at') THEN
+    ALTER TABLE consultations ADD COLUMN signed_at TIMESTAMP;
+  END IF;
+END $$;
+
+-- ============================================
+-- STEP 5B: Update prescriptions table
+-- ============================================
+
+DO $$ 
+BEGIN
+  -- Add signed_by_staff_id column
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                 WHERE table_name='prescriptions' AND column_name='signed_by_staff_id') THEN
+    ALTER TABLE prescriptions ADD COLUMN signed_by_staff_id UUID REFERENCES medical_staff(id);
+  END IF;
+
+  -- Add signed_at column
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                 WHERE table_name='prescriptions' AND column_name='signed_at') THEN
+    ALTER TABLE prescriptions ADD COLUMN signed_at TIMESTAMP;
+  END IF;
 END $$;
 
 -- ============================================

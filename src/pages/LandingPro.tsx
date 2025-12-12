@@ -133,7 +133,7 @@ const LandingPro = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 md:h-5 w-4 md:w-5 text-medical-green" />
-                  <span>{t("hipaaCompliant")}</span>
+                  <span>NDPR Compliant</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 md:h-5 w-4 md:w-5 text-medical-green" />
@@ -188,7 +188,7 @@ const LandingPro = () => {
             </div>
             <div className="flex flex-col items-center">
               <Database className="h-10 md:h-12 w-10 md:w-12 text-medical-green mb-2" />
-              <p className="text-xs md:text-sm font-semibold text-gray-900">HIPAA</p>
+              <p className="text-xs md:text-sm font-semibold text-gray-900">NDPR</p>
               <p className="text-xs md:text-sm text-gray-600">Compliant</p>
             </div>
             <div className="flex flex-col items-center">
@@ -200,34 +200,7 @@ const LandingPro = () => {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-12 md:py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="text-center mb-10 md:mb-16">
-            <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-3 md:mb-4">{t("completeWorkflow")}</h2>
-            <p className="text-base md:text-xl text-gray-600 max-w-3xl mx-auto">
-              {t("workflowDescription")}
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-            <FeatureCard 
-              number="01"
-              title={t("patientRegistration")}
-              description={t("patientRegDesc")}
-            />
-            <FeatureCard 
-              number="02"
-              title={t("clinicalManagement")}
-              description={t("clinicalDesc")}
-            />
-            <FeatureCard 
-              number="03"
-              title={t("herbalTracking")}
-              description={t("herbalDesc")}
-            />
-          </div>
-        </div>
-      </section>
+
 
       {/* CTA */}
       <section className="py-12 md:py-20 bg-medical-green text-white">
@@ -240,8 +213,8 @@ const LandingPro = () => {
             <Button size="lg" onClick={() => navigate("/register")} className="bg-white text-medical-green hover:bg-gray-100 w-full sm:w-auto">
               {t("registerNow")}
             </Button>
-            <Button size="lg" onClick={() => navigate("/admin")} className="bg-medical-gold hover:bg-yellow-600 text-white border-0 w-full sm:w-auto">
-              {t("adminAccess")}
+            <Button size="lg" onClick={() => navigate("/staff-login")} className="bg-medical-gold hover:bg-yellow-600 text-white border-0 w-full sm:w-auto">
+              Staff Login
             </Button>
           </div>
         </div>
@@ -263,7 +236,7 @@ const LandingPro = () => {
                 </p>
                 <p className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4" />
-                  HIPAA Compliant
+                  NDPR Compliant
                 </p>
               </div>
             </div>
@@ -273,27 +246,26 @@ const LandingPro = () => {
                 <li><button onClick={() => navigate("/register")} className="hover:text-white transition">Patient Registration</button></li>
                 <li><button onClick={() => navigate("/staff-login")} className="hover:text-white transition">Healthcare Provider</button></li>
                 <li><button onClick={() => navigate("/admin")} className="hover:text-white transition">Admin Portal</button></li>
-                <li className="hover:text-white transition cursor-pointer">Features</li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Company</h4>
               <ul className="space-y-2 text-xs md:text-sm text-gray-400">
-                <li className="hover:text-white transition cursor-pointer">About HealthMR</li>
-                <li className="hover:text-white transition cursor-pointer">Abia Starthon 2025</li>
-                <li className="hover:text-white transition cursor-pointer">Contact Us</li>
+                <li><button onClick={() => navigate("/about")} className="hover:text-white transition">About HealthMR</button></li>
+                <li><button onClick={() => navigate("/contact")} className="hover:text-white transition">Contact Us</button></li>
                 <li className="text-gray-400">Email: info@healthmr.ng</li>
+                <li className="text-gray-400">Phone: +234-XXX-XXX-XXXX</li>
                 <li className="text-gray-400">Location: Abia State, Nigeria</li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Legal & Security</h4>
+              <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Legal & Connect</h4>
               <ul className="space-y-2 text-xs md:text-sm text-gray-400">
-                <li className="hover:text-white transition cursor-pointer">Privacy Policy</li>
-                <li className="hover:text-white transition cursor-pointer">Terms of Service</li>
-                <li className="hover:text-white transition cursor-pointer">Data Protection</li>
-                <li className="hover:text-white transition cursor-pointer">HIPAA Compliance</li>
-                <li className="hover:text-white transition cursor-pointer">Cookie Policy</li>
+                <li><button onClick={() => navigate("/privacy")} className="hover:text-white transition">Privacy Policy</button></li>
+                <li><button onClick={() => navigate("/terms")} className="hover:text-white transition">Terms of Service</button></li>
+                <li><button onClick={() => navigate("/data-protection")} className="hover:text-white transition">Data Protection</button></li>
+                <li className="text-gray-400">Twitter: @HealthMR_NG</li>
+                <li className="text-gray-400">LinkedIn: HealthMR Nigeria</li>
               </ul>
             </div>
           </div>
@@ -304,8 +276,8 @@ const LandingPro = () => {
               <p className="font-semibold text-white mb-2">🔒 Data Protection & Privacy</p>
               <p className="leading-relaxed">
                 HealthMR is committed to protecting your medical data. All patient information is encrypted using bank-level security (AES-256), 
-                stored securely in compliance with Nigerian Data Protection Regulation (NDPR) and HIPAA standards. We never share your personal 
-                health information without your explicit consent. Your data is backed up daily and accessible only to authorized healthcare providers.
+                stored securely in compliance with Nigerian Data Protection Regulation (NDPR) and international healthcare data protection standards. 
+                We never share your personal health information without your explicit consent. Your data is backed up daily and accessible only to authorized healthcare providers.
               </p>
             </div>
           </div>

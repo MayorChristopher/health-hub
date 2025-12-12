@@ -19,7 +19,13 @@ import HospitalAccess from "./pages/HospitalAccess";
 import HospitalVerify from "./pages/HospitalVerify";
 import PatientDashboardNew from "./pages/PatientDashboardNew";
 import MedicalDashboardNew from "./pages/MedicalDashboardNew";
+import PatientRecordView from "./pages/PatientRecordView";
 import HealthCoach from "./pages/HealthCoach";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import DataProtection from "./pages/DataProtection";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,8 +51,14 @@ const App = () => (
             <Route path="/hospital-access" element={<HospitalAccess />} />
             <Route path="/hospital-verify" element={<HospitalVerify />} />
             <Route path="/patient-dashboard" element={<PatientDashboardNew />} />
+            <Route path="/patient-record/:patientId" element={<PatientRecordView />} />
             <Route path="/health-coach" element={<HealthCoach />} />
             <Route path="/medical-dashboard" element={<MedicalDashboardNew />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/data-protection" element={<DataProtection />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
