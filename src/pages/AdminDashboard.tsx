@@ -212,9 +212,17 @@ const AdminDashboard = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input placeholder="Search staff..." className="pl-9" value={staffSearchTerm} onChange={(e) => setStaffSearchTerm(e.target.value)} />
               </div>
-              <Button className="bg-medical-green hover:bg-medical-dark">
-                <UserPlus className="h-4 w-4 mr-2" /> Add Staff
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => navigate("/admin/verify-staff")}
+                  className="bg-yellow-600 hover:bg-yellow-700"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" /> Verify Pending Staff
+                </Button>
+                <Button className="bg-medical-green hover:bg-medical-dark">
+                  <UserPlus className="h-4 w-4 mr-2" /> Add Staff
+                </Button>
+              </div>
             </div>
 
             <Card className="p-6">

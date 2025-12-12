@@ -8,11 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Activity, ArrowLeft } from "lucide-react";
+import { Activity, ArrowLeft, Copy, CheckCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const Registration = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [showIdModal, setShowIdModal] = useState(false);
+  const [registeredId, setRegisteredId] = useState("");
+  const [copied, setCopied] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -125,29 +129,9 @@ const Registration = () => {
 
       if (dbError) throw dbError;
 
-      const statusMessage = recordStatus === 'provisional' 
-        ? " (PROVISIONAL - Please provide NIN to verify your record)"
-        : "";
-
-      // Show success with ID prominently
       setLoading(false);
-      
-      // Display ID in alert dialog
-      alert(
-        `✅ REGISTRATION SUCCESSFUL!\n\n` +
-        `Your HealthMR ID: ${patientData.healthmr_id}\n\n` +
-        `${statusMessage}\n\n` +
-        `IMPORTANT: Save this ID now! You will need it to login.\n\n` +
-        `Click OK to continue to your dashboard.`
-      );
-      
-      toast({
-        title: "Registration Successful!",
-        description: `Your HealthMR ID: ${patientData.healthmr_id}${statusMessage}`,
-        duration: 15000,
-      });
-      
-      navigate("/patient-dashboard");
+      setRegisteredId(patientData.healthmr_id);
+      setShowIdModal(true);
     } catch (error: any) {
       setLoading(false);
       toast({
@@ -376,6 +360,56 @@ const Registration = () => {
           </form>
         </Card>
       </div>
+
+      {/* ID Display Modal */}
+      <Dialog open={showIdModal} onOpenChange={(open) => !open && navigate("/patient-dashboard")}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <CheckCircle className="h-6 w-6 text-green-600" />
+              Registration Successful!
+            </DialogTitle>
+            <DialogDescription className="text-base">
+              Your HealthMR ID has been generated. Save this ID - you'll need it to login.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="bg-green-50 border-2 border-green-500 rounded-lg p-6 text-center">
+              <p className="text-sm text-gray-600 mb-2">Your HealthMR ID</p>
+              <p className="text-3xl font-bold text-green-700 mb-4">{registeredId}</p>
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText(registeredId);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="w-full"
+                variant="outline"
+              >
+                {copied ? (
+                  <><CheckCircle className="h-4 w-4 mr-2" /> Copied!</>
+                ) : (
+                  <><Copy className="h-4 w-4 mr-2" /> Copy ID</>
+                )}
+              </Button>
+            </div>
+
+            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+              <p className="text-sm text-yellow-800">
+                <strong>⚠️ Important:</strong> Write down or screenshot this ID. You cannot recover it if lost.
+              </p>
+            </div>
+
+            <Button
+              onClick={() => navigate("/patient-dashboard")}
+              className="w-full bg-medical-green hover:bg-medical-dark"
+            >
+              Continue to Dashboard
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

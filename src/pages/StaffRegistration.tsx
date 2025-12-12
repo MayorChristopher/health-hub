@@ -7,12 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, UserPlus } from "lucide-react";
+import { ArrowLeft, UserPlus, Copy, CheckCircle, AlertTriangle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import bcrypt from "bcryptjs";
 
 const StaffRegistration = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [showIdModal, setShowIdModal] = useState(false);
+  const [registeredId, setRegisteredId] = useState("");
+  const [copied, setCopied] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     role: "",
@@ -67,29 +71,9 @@ const StaffRegistration = () => {
 
       if (error) throw error;
 
-      // Show Staff ID prominently
       setLoading(false);
-      
-      // Display ID in alert dialog
-      alert(
-        `✅ REGISTRATION SUBMITTED!\n\n` +
-        `Your Staff ID: ${data.staff_id}\n\n` +
-        `IMPORTANT: Save this ID now! You will need it to login.\n\n` +
-        `⚠️ Your account requires admin verification of your MDCN license before activation.\n\n` +
-        `You will be notified once approved.\n\n` +
-        `Click OK to go to login page.`
-      );
-      
-      toast({
-        title: "Registration Submitted!",
-        description: `Your Staff ID: ${data.staff_id}. Awaiting admin verification.`,
-        duration: 15000,
-      });
-
-      // Navigate to login after 3 seconds
-      setTimeout(() => {
-        navigate("/staff-login");
-      }, 3000);
+      setRegisteredId(data.staff_id);
+      setShowIdModal(true);
     } catch (error: any) {
       toast({
         title: "Registration Failed",
@@ -127,7 +111,7 @@ const StaffRegistration = () => {
                 required
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                placeholder="Dr. John Doe"
+                placeholder="Dr. Adaeze Nwosu"
               />
             </div>
 
@@ -237,6 +221,66 @@ const StaffRegistration = () => {
           </div>
         </Card>
       </div>
+
+      {/* ID Display Modal */}
+      <Dialog open={showIdModal} onOpenChange={(open) => !open && navigate("/staff-login")}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <CheckCircle className="h-6 w-6 text-green-600" />
+              Registration Submitted!
+            </DialogTitle>
+            <DialogDescription className="text-base">
+              Your Staff ID has been generated. Save this ID - you'll need it to login.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="bg-green-50 border-2 border-green-500 rounded-lg p-6 text-center">
+              <p className="text-sm text-gray-600 mb-2">Your Staff ID</p>
+              <p className="text-3xl font-bold text-green-700 mb-4">{registeredId}</p>
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText(registeredId);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="w-full"
+                variant="outline"
+              >
+                {copied ? (
+                  <><CheckCircle className="h-4 w-4 mr-2" /> Copied!</>
+                ) : (
+                  <><Copy className="h-4 w-4 mr-2" /> Copy ID</>
+                )}
+              </Button>
+            </div>
+
+            <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 text-yellow-700 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-yellow-800">
+                  <p className="font-bold mb-1">Admin Verification Required</p>
+                  <p>Your account requires admin verification of your MDCN license before you can login. You will be notified once approved.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-300 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>ℹ️ Note:</strong> Write down or screenshot this ID. You cannot recover it if lost.
+              </p>
+            </div>
+
+            <Button
+              onClick={() => navigate("/staff-login")}
+              className="w-full bg-medical-green hover:bg-medical-dark"
+            >
+              Go to Login Page
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
