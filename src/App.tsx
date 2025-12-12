@@ -9,7 +9,9 @@ import LandingPro from "./pages/LandingPro";
 import PatientLogin from "./pages/PatientLogin";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminEditPatient from "./pages/AdminEditPatient";
 import StaffLogin from "./pages/StaffLogin";
+import StaffRegistration from "./pages/StaffRegistration";
 import Registration from "./pages/Registration";
 import UserAccess from "./pages/UserAccess";
 import Verify from "./pages/Verify";
@@ -34,10 +36,12 @@ const App = () => (
             <Route path="/patient-login" element={<PatientLogin />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/edit-patient/:patientId" element={<AdminEditPatient />} />
             <Route path="/register" element={<Registration />} />
             <Route path="/user-access" element={<UserAccess />} />
             <Route path="/verify" element={<Verify />} />
             <Route path="/staff-login" element={<StaffLogin />} />
+            <Route path="/staff-registration" element={<StaffRegistration />} />
             <Route path="/hospital-access" element={<HospitalAccess />} />
             <Route path="/hospital-verify" element={<HospitalVerify />} />
             <Route path="/patient-dashboard" element={<PatientDashboardNew />} />

@@ -172,6 +172,34 @@ const LandingPro = () => {
         </div>
       </section>
 
+      {/* Trust & Security Section */}
+      <section className="py-8 md:py-12 bg-white border-y">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 text-center">
+            <div className="flex flex-col items-center">
+              <Shield className="h-10 md:h-12 w-10 md:w-12 text-medical-green mb-2" />
+              <p className="text-xs md:text-sm font-semibold text-gray-900">Bank-Level</p>
+              <p className="text-xs md:text-sm text-gray-600">Encryption</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <CheckCircle className="h-10 md:h-12 w-10 md:w-12 text-medical-green mb-2" />
+              <p className="text-xs md:text-sm font-semibold text-gray-900">NIN Verified</p>
+              <p className="text-xs md:text-sm text-gray-600">Identity</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <Database className="h-10 md:h-12 w-10 md:w-12 text-medical-green mb-2" />
+              <p className="text-xs md:text-sm font-semibold text-gray-900">HIPAA</p>
+              <p className="text-xs md:text-sm text-gray-600">Compliant</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <Clock className="h-10 md:h-12 w-10 md:w-12 text-medical-green mb-2" />
+              <p className="text-xs md:text-sm font-semibold text-gray-900">24/7</p>
+              <p className="text-xs md:text-sm text-gray-600">Available</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="py-12 md:py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -222,40 +250,80 @@ const LandingPro = () => {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-8 md:py-12">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-6 md:mb-8">
-            <div className="col-span-2 md:col-span-1">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 mb-6 md:mb-8">
+            <div className="md:col-span-1">
               <img src="/logo.png" alt="HealthMR" className="h-8 md:h-10 mb-3 md:mb-4 brightness-0 invert" />
-              <p className="text-gray-400 text-xs md:text-sm">
-                {t("footerDescription")}
+              <p className="text-gray-400 text-xs md:text-sm mb-4">
+                Integrated Electronic Medical Records for Nigerian Healthcare Facilities
               </p>
+              <div className="space-y-2 text-xs md:text-sm text-gray-400">
+                <p className="flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  SSL Secured
+                </p>
+                <p className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  HIPAA Compliant
+                </p>
+              </div>
             </div>
             <div>
-              <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">{t("product")}</h4>
+              <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Product</h4>
               <ul className="space-y-2 text-xs md:text-sm text-gray-400">
-                <li>{t("features")}</li>
-                <li>{t("security")}</li>
-                <li>{t("pricing")}</li>
+                <li><button onClick={() => navigate("/register")} className="hover:text-white transition">Patient Registration</button></li>
+                <li><button onClick={() => navigate("/staff-login")} className="hover:text-white transition">Healthcare Provider</button></li>
+                <li><button onClick={() => navigate("/admin")} className="hover:text-white transition">Admin Portal</button></li>
+                <li className="hover:text-white transition cursor-pointer">Features</li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">{t("company")}</h4>
+              <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Company</h4>
               <ul className="space-y-2 text-xs md:text-sm text-gray-400">
-                <li>{t("about")}</li>
-                <li>{t("contact")}</li>
-                <li>{t("careers")}</li>
+                <li className="hover:text-white transition cursor-pointer">About HealthMR</li>
+                <li className="hover:text-white transition cursor-pointer">Abia Starthon 2025</li>
+                <li className="hover:text-white transition cursor-pointer">Contact Us</li>
+                <li className="text-gray-400">Email: info@healthmr.ng</li>
+                <li className="text-gray-400">Location: Abia State, Nigeria</li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">{t("legal")}</h4>
+              <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Legal & Security</h4>
               <ul className="space-y-2 text-xs md:text-sm text-gray-400">
-                <li>{t("privacy")}</li>
-                <li>{t("terms")}</li>
-                <li>{t("compliance")}</li>
+                <li className="hover:text-white transition cursor-pointer">Privacy Policy</li>
+                <li className="hover:text-white transition cursor-pointer">Terms of Service</li>
+                <li className="hover:text-white transition cursor-pointer">Data Protection</li>
+                <li className="hover:text-white transition cursor-pointer">HIPAA Compliance</li>
+                <li className="hover:text-white transition cursor-pointer">Cookie Policy</li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 pt-6 md:pt-8 text-center text-xs md:text-sm text-gray-400">
-            <p>&copy; {t("copyright")}</p>
+          
+          {/* Data Protection Notice */}
+          <div className="border-t border-gray-800 pt-6 mb-6">
+            <div className="bg-gray-800 rounded-lg p-4 text-xs md:text-sm text-gray-400">
+              <p className="font-semibold text-white mb-2">🔒 Data Protection & Privacy</p>
+              <p className="leading-relaxed">
+                HealthMR is committed to protecting your medical data. All patient information is encrypted using bank-level security (AES-256), 
+                stored securely in compliance with Nigerian Data Protection Regulation (NDPR) and HIPAA standards. We never share your personal 
+                health information without your explicit consent. Your data is backed up daily and accessible only to authorized healthcare providers.
+              </p>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 pt-6 md:pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs md:text-sm text-gray-400">
+              <p>&copy; 2025 HealthMR. All rights reserved. Abia Starthon Project.</p>
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1">
+                  <Shield className="h-4 w-4 text-green-500" />
+                  Verified Secure
+                </span>
+                <span>|</span>
+                <span>NIN Integrated</span>
+                <span>|</span>
+                <span>Made in Nigeria 🇳🇬</span>
+              </div>
+            </div>
           </div>
         </div>
       </footer>

@@ -161,18 +161,41 @@ const AdminDashboard = () => {
                         <th className="text-left py-3">Name</th>
                         <th className="text-left py-3">NIN</th>
                         <th className="text-left py-3">Phone</th>
+                        <th className="text-left py-3">Status</th>
                         <th className="text-left py-3">Registered</th>
+                        <th className="text-right py-3">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredPatients.map((patient) => (
                         <tr key={patient.id} className="border-b hover:bg-gray-50">
                           <td className="py-3 font-mono text-sm">{patient.healthmr_id}</td>
-                          <td className="py-3">{patient.full_name}</td>
-                          <td className="py-3 font-mono text-sm">{patient.nin}</td>
+                          <td className="py-3">{patient.first_name} {patient.last_name}</td>
+                          <td className="py-3 font-mono text-sm">
+                            {patient.nin || <span className="text-gray-400 italic">Temp: {patient.temp_id}</span>}
+                          </td>
                           <td className="py-3">{patient.phone}</td>
+                          <td className="py-3">
+                            <span className={`px-2 py-1 text-xs rounded ${
+                              patient.record_status === 'verified' 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {patient.record_status === 'verified' ? 'Verified' : 'Provisional'}
+                            </span>
+                          </td>
                           <td className="py-3 text-sm text-gray-600">
                             {new Date(patient.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="py-3 text-right">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => navigate(`/admin/edit-patient/${patient.id}`)}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
                           </td>
                         </tr>
                       ))}

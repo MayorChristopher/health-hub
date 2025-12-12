@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -10,6 +12,82 @@ import { useNavigate } from "react-router-dom";
 const MedicalDashboardNew = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
+  const [staffData, setStaffData] = useState<any>(null);
+  const [stats, setStats] = useState({ appointments: 0, patients: 0, pending: 0, labResults: 0 });
+  const [patients, setPatients] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
+
+  useEffect(() => {
+    checkAuth();
+    fetchData();
+  }, []);
+
+  const checkAuth = () => {
+    const session = localStorage.getItem("staff_session");
+    if (!session) {
+      toast({
+        title: "Authentication Required",
+        description: "Please login to access the dashboard",
+        variant: "destructive",
+      });
+      navigate("/staff-login");
+      return;
+    }
+    setStaffData(JSON.parse(session));
+  };
+
+  const fetchData = async () => {
+    try {
+      // Fetch patients
+      const { data: patientsData } = await supabase
+        .from("patients")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (patientsData) setPatients(patientsData);
+
+      // Fetch appointments
+      const { data: appointmentsData } = await supabase
+        .from("appointments")
+        .select("*, patients(first_name, last_name, healthmr_id)")
+        .order("appointment_date", { ascending: true })
+        .limit(10);
+      if (appointmentsData) setAppointments(appointmentsData);
+
+      // Fetch stats
+      const { count: appointmentsCount } = await supabase
+        .from("appointments")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "scheduled");
+      
+      const { count: patientsCount } = await supabase
+        .from("patients")
+        .select("*", { count: "exact", head: true });
+      
+      const { count: labCount } = await supabase
+        .from("lab_tests")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "completed");
+
+      setStats({
+        appointments: appointmentsCount || 0,
+        patients: patientsCount || 0,
+        pending: 0,
+        labResults: labCount || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("staff_session");
+    toast({
+      title: "Logged Out",
+      description: "You have been logged out successfully",
+    });
+    navigate("/");
+  };
 
   const Sidebar = () => (
     <div className="space-y-1">
@@ -30,7 +108,7 @@ const MedicalDashboardNew = () => {
           <item.icon className="mr-2 h-4 w-4" /> {item.label}
         </Button>
       ))}
-      <Button variant="ghost" className="w-full justify-start text-red-600" onClick={() => navigate("/")}>
+      <Button variant="ghost" className="w-full justify-start text-red-600" onClick={handleLogout}>
         <LogOut className="mr-2 h-4 w-4" /> Logout
       </Button>
     </div>
@@ -54,7 +132,17 @@ const MedicalDashboardNew = () => {
             </div>
             <span className="font-bold text-medical-green">HealthMR</span>
           </div>
-          <Avatar><AvatarFallback className="bg-medical-gold text-white">DS</AvatarFallback></Avatar>
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden md:block">
+              <p className="text-sm font-medium">{staffData?.full_name || "Staff"}</p>
+              <p className="text-xs text-gray-500 capitalize">{staffData?.role || ""}</p>
+            </div>
+            <Avatar>
+              <AvatarFallback className="bg-medical-gold text-white">
+                {staffData?.full_name?.split(" ").map((n: string) => n[0]).join("") || "S"}
+              </AvatarFallback>
+            </Avatar>
+          </div>
         </div>
       </header>
 
@@ -66,21 +154,31 @@ const MedicalDashboardNew = () => {
             {activeTab === "overview" && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-medical-dark">Dr. Sarah Johnson</h2>
-                  <p className="text-gray-600">Cardiology Department</p>
+                  <h2 className="text-2xl font-bold text-medical-dark">{staffData?.full_name || "Staff Dashboard"}</h2>
+                  <p className="text-gray-600 capitalize">{staffData?.role || "Healthcare Provider"} • {staffData?.hospital_id || ""}</p>
                 </div>
                 <div className="grid sm:grid-cols-4 gap-4">
-                  <StatCard label="Today's Appointments" value="8" color="green" />
-                  <StatCard label="Active Patients" value="124" color="gold" />
-                  <StatCard label="Pending Reviews" value="5" color="green" />
-                  <StatCard label="Lab Results" value="12" color="gold" />
+                  <StatCard label="Appointments" value={stats.appointments.toString()} color="green" />
+                  <StatCard label="Total Patients" value={stats.patients.toString()} color="gold" />
+                  <StatCard label="Pending Reviews" value={stats.pending.toString()} color="green" />
+                  <StatCard label="Lab Results" value={stats.labResults.toString()} color="gold" />
                 </div>
                 <Card className="p-6">
-                  <h3 className="font-semibold text-medical-dark mb-4">Today's Schedule</h3>
-                  <div className="space-y-3">
-                    <ScheduleItem patient="John Doe" type="Checkup" time="9:00 AM" />
-                    <ScheduleItem patient="Jane Smith" type="Follow-up" time="10:30 AM" />
-                  </div>
+                  <h3 className="font-semibold text-medical-dark mb-4">Recent Appointments</h3>
+                  {appointments.length > 0 ? (
+                    <div className="space-y-3">
+                      {appointments.slice(0, 5).map((apt) => (
+                        <ScheduleItem 
+                          key={apt.id}
+                          patient={`${apt.patients?.first_name || ""} ${apt.patients?.last_name || ""}`}
+                          type={apt.reason || "Consultation"}
+                          time={new Date(apt.appointment_date).toLocaleString()}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm">No appointments scheduled</p>
+                  )}
                 </Card>
               </div>
             )}
@@ -97,8 +195,20 @@ const MedicalDashboardNew = () => {
                     <Button className="bg-medical-green hover:bg-medical-dark">Add Patient</Button>
                   </div>
                 </div>
-                <PatientCard name="John Doe" id="HMR-2024-001234" lastVisit="Jan 15, 2024" />
-                <PatientCard name="Jane Smith" id="HMR-2024-001235" lastVisit="Jan 10, 2024" />
+                {patients.length > 0 ? (
+                  patients.map((patient) => (
+                    <PatientCard 
+                      key={patient.id}
+                      name={`${patient.first_name} ${patient.last_name}`}
+                      id={patient.healthmr_id}
+                      lastVisit={new Date(patient.created_at).toLocaleDateString()}
+                    />
+                  ))
+                ) : (
+                  <Card className="p-6 text-center text-gray-500">
+                    <p>No patients found</p>
+                  </Card>
+                )}
               </div>
             )}
 

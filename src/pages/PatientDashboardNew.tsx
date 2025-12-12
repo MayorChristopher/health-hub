@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { AddMedicalTestDialog } from "@/components/AddMedicalTestDialog";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
+import SelfReportedVitals from "@/components/SelfReportedVitals";
 
 const PatientDashboardNew = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const PatientDashboardNew = () => {
   const [labTests, setLabTests] = useState<any[]>([]);
   const [consultations, setConsultations] = useState<any[]>([]);
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
+  const [selfReportedVitals, setSelfReportedVitals] = useState<any[]>([]);
 
   useEffect(() => {
     fetchPatientData();
@@ -69,6 +71,13 @@ const PatientDashboardNew = () => {
         .eq('status', 'active')
         .order('prescribed_at', { ascending: false });
       if (presc) setPrescriptions(presc);
+
+      const { data: selfVitals } = await supabase
+        .from('self_reported_vitals')
+        .select('*')
+        .eq('patient_id', patient.id)
+        .order('recorded_at', { ascending: false });
+      if (selfVitals) setSelfReportedVitals(selfVitals);
     }
   };
 
@@ -88,6 +97,7 @@ const PatientDashboardNew = () => {
       </Button>
       {[
         { id: "overview", icon: Activity, label: t("overview") },
+        { id: "vitals", icon: Activity, label: "My Vitals" },
         { id: "records", icon: FileText, label: t("medicalRecords") },
         { id: "appointments", icon: Calendar, label: t("appointments") },
         { id: "prescriptions", icon: Pill, label: t("prescriptions") },
@@ -158,6 +168,26 @@ const PatientDashboardNew = () => {
                     <p className="text-gray-500 text-sm">{t("noActivity")}</p>
                   )}
                 </Card>
+              </div>
+            )}
+
+            {activeTab === "vitals" && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-medical-dark">My Health Vitals</h2>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-blue-800">
+                    ℹ️ <strong>Self-Reported Data:</strong> Track your health measurements here. 
+                    These readings are for your personal tracking and discussion with your doctor. 
+                    Official medical vitals will be recorded by healthcare staff during consultations.
+                  </p>
+                </div>
+                {patientData && (
+                  <SelfReportedVitals 
+                    patientId={patientData.id} 
+                    vitals={selfReportedVitals}
+                    onUpdate={fetchPatientData}
+                  />
+                )}
               </div>
             )}
 

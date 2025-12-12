@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/hooks/use-toast";
-import { Plus } from "lucide-react";
+import { Plus, Upload, FileText, AlertTriangle, CheckCircle } from "lucide-react";
 
 const COMMON_TESTS = [
   { 
@@ -163,43 +163,109 @@ export const AddMedicalTestDialog = ({ patientId, onSuccess }: { patientId: stri
   const [customTest, setCustomTest] = useState("");
   const [results, setResults] = useState("");
   const [notes, setNotes] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   
   const selectedTest = COMMON_TESTS.find(test => test.value === testType);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+      if (!validTypes.includes(selectedFile.type)) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload a JPG, PNG, or PDF file",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (selectedFile.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "File size must be less than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setFile(selectedFile);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    const finalTestType = testType === "Other" ? customTest : testType;
-
-    const { error } = await supabase.from("lab_tests").insert({
-      patient_id: patientId,
-      test_type: finalTestType,
-      status: "completed",
-      results,
-      notes,
-      completed_at: new Date().toISOString(),
-    });
-
-    if (error) {
+    
+    // MANDATORY: Check if file is uploaded
+    if (!file) {
       toast({
-        title: "Error",
-        description: "Failed to add test result",
+        title: "Lab Slip Required",
+        description: "Please upload a photo or PDF of your lab slip for verification",
         variant: "destructive",
       });
-    } else {
+      return;
+    }
+    
+    setLoading(true);
+    setUploading(true);
+
+    try {
+      const finalTestType = testType === "Other" ? customTest : testType;
+      
+      // Upload file to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${patientId}/${Date.now()}_${finalTestType.replace(/\s+/g, '_')}.${fileExt}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('lab-results')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw new Error("Failed to upload file: " + uploadError.message);
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('lab-results')
+        .getPublicUrl(fileName);
+
+      // Insert lab test with file URL
+      const { error } = await supabase.from("lab_tests").insert({
+        patient_id: patientId,
+        test_type: finalTestType,
+        status: "completed",
+        results,
+        notes: notes + `\n\n📎 Lab Slip: ${publicUrl}`,
+        completed_at: new Date().toISOString(),
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Success",
-        description: "Medical test result added successfully",
+        description: "Medical test result and lab slip uploaded successfully",
       });
+      
       setOpen(false);
       setTestType("");
       setCustomTest("");
       setResults("");
       setNotes("");
+      setFile(null);
       onSuccess();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add test result",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+      setUploading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -277,6 +343,53 @@ export const AddMedicalTestDialog = ({ patientId, onSuccess }: { patientId: stri
             </p>
           </div>
 
+          {/* MANDATORY FILE UPLOAD */}
+          <div className="border-2 border-dashed border-yellow-300 bg-yellow-50 rounded-lg p-4">
+            <div className="flex items-start gap-2 mb-3">
+              <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <Label className="text-yellow-900 font-semibold">Upload Lab Slip (REQUIRED) *</Label>
+                <p className="text-xs text-yellow-800 mt-1">
+                  <strong>Important:</strong> To prevent clinical errors, you MUST upload a photo or PDF of your original lab slip. 
+                  This allows doctors to verify the results and reduces liability.
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-3">
+              <Input
+                id="file-upload"
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,application/pdf"
+                onChange={handleFileChange}
+                required
+                className="cursor-pointer"
+              />
+              <p className="text-xs text-gray-600 mt-2">
+                📸 Accepted: JPG, PNG, PDF (Max 5MB)
+              </p>
+              
+              {file && (
+                <div className="mt-3 flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-green-900">{file.name}</p>
+                    <p className="text-xs text-green-700">{(file.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setFile(null)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    Remove
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div>
             <Label htmlFor="notes">Additional Notes (Optional)</Label>
             <Textarea
@@ -289,9 +402,41 @@ export const AddMedicalTestDialog = ({ patientId, onSuccess }: { patientId: stri
             <p className="text-xs text-muted-foreground mt-1">Add any extra information about the test or recommendations</p>
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full bg-medical-green hover:bg-medical-dark">
-            {loading ? "Adding..." : "Add Test Result"}
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-red-800">
+                <strong>Liability Notice:</strong> Inaccurate data entry can lead to clinical harm. 
+                The uploaded lab slip serves as the verified source document for your doctor.
+              </p>
+            </div>
+          </div>
+
+          <Button 
+            type="submit" 
+            disabled={loading || !file} 
+            className="w-full bg-medical-green hover:bg-medical-dark"
+          >
+            {uploading ? (
+              <>
+                <Upload className="mr-2 h-4 w-4 animate-pulse" />
+                Uploading Lab Slip...
+              </>
+            ) : loading ? (
+              "Adding..."
+            ) : (
+              <>
+                <Upload className="mr-2 h-4 w-4" />
+                Upload & Add Test Result
+              </>
+            )}
           </Button>
+          
+          {!file && (
+            <p className="text-xs text-center text-red-600">
+              ⚠️ Lab slip upload is required to submit
+            </p>
+          )}
         </form>
       </DialogContent>
     </Dialog>

@@ -17,6 +17,7 @@ const Registration = () => {
     firstName: "",
     lastName: "",
     nin: "",
+    hasNoNIN: false, // New: For provisional registration
     phone: "",
     email: "",
     dob: "",
@@ -37,15 +38,35 @@ const Registration = () => {
     setLoading(true);
     
     try {
-      // Validate password length (NIN must be 11 digits)
-      if (formData.nin.length !== 11) {
-        toast({
-          title: "Invalid NIN",
-          description: "NIN must be exactly 11 digits",
-          variant: "destructive"
-        });
-        setLoading(false);
-        return;
+      // Validate NIN if provided
+      if (!formData.hasNoNIN) {
+        if (formData.nin.length !== 11) {
+          toast({
+            title: "Invalid NIN",
+            description: "NIN must be exactly 11 digits",
+            variant: "destructive"
+          });
+          setLoading(false);
+          return;
+        }
+
+        // CHECK FOR DUPLICATE NIN
+        const { data: existingPatient } = await supabase
+          .from('patients')
+          .select('healthmr_id, first_name, last_name')
+          .eq('nin', formData.nin)
+          .single();
+
+        if (existingPatient) {
+          toast({
+            title: "Duplicate Registration Detected",
+            description: `This NIN is already registered to ${existingPatient.first_name} ${existingPatient.last_name} (${existingPatient.healthmr_id}). Please login instead.`,
+            variant: "destructive",
+            duration: 10000,
+          });
+          setLoading(false);
+          return;
+        }
       }
 
       // Create auth user with proper password
@@ -56,6 +77,19 @@ const Registration = () => {
 
       if (authError) throw authError;
 
+      // Generate Temporary ID if no NIN (DOB-based algorithm)
+      let tempId = null;
+      let recordStatus = 'verified';
+      
+      if (formData.hasNoNIN) {
+        // Algorithm: TEMP-YYYYMMDD-INITIALS-RANDOM
+        const dobFormatted = formData.dob.replace(/-/g, '');
+        const initials = (formData.firstName[0] + formData.lastName[0]).toUpperCase();
+        const random = Math.floor(1000 + Math.random() * 9000);
+        tempId = `TEMP-${dobFormatted}-${initials}-${random}`;
+        recordStatus = 'provisional';
+      }
+
       // Create patient record
       const { error: dbError } = await supabase
         .from('patients')
@@ -63,7 +97,9 @@ const Registration = () => {
           user_id: authData.user?.id,
           first_name: formData.firstName,
           last_name: formData.lastName,
-          nin: formData.nin,
+          nin: formData.hasNoNIN ? null : formData.nin,
+          temp_id: tempId,
+          record_status: recordStatus,
           phone: formData.phone,
           email: formData.email,
           date_of_birth: formData.dob,
@@ -88,9 +124,13 @@ const Registration = () => {
         .eq('user_id', authData.user?.id)
         .single();
 
+      const statusMessage = recordStatus === 'provisional' 
+        ? " (PROVISIONAL - Please provide NIN to verify your record)"
+        : "";
+
       toast({
         title: "Registration Successful!",
-        description: `Your HealthMR ID: ${newPatient?.healthmr_id}. Save this for login.`,
+        description: `Your HealthMR ID: ${newPatient?.healthmr_id}${statusMessage}. Save this for login.`,
         duration: 10000,
       });
       
@@ -138,9 +178,37 @@ const Registration = () => {
                   <Label htmlFor="lastName">Last Name *</Label>
                   <Input id="lastName" required value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})} />
                 </div>
-                <div>
-                  <Label htmlFor="nin">National Identification Number (NIN) *</Label>
-                  <Input id="nin" required maxLength={11} value={formData.nin} onChange={(e) => setFormData({...formData, nin: e.target.value})} />
+                <div className="md:col-span-2">
+                  <div className="space-y-3">
+                    <Label htmlFor="nin">National Identification Number (NIN) *</Label>
+                    <Input 
+                      id="nin" 
+                      required={!formData.hasNoNIN}
+                      disabled={formData.hasNoNIN}
+                      maxLength={11} 
+                      value={formData.nin} 
+                      onChange={(e) => setFormData({...formData, nin: e.target.value})} 
+                      placeholder={formData.hasNoNIN ? "NIN not available" : "Enter 11-digit NIN"}
+                    />
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="hasNoNIN" 
+                        checked={formData.hasNoNIN} 
+                        onCheckedChange={(checked) => setFormData({...formData, hasNoNIN: checked as boolean, nin: ""})} 
+                      />
+                      <Label htmlFor="hasNoNIN" className="font-normal text-sm text-gray-600">
+                        I don't have a NIN yet (infant, recent immigrant, or remote area)
+                      </Label>
+                    </div>
+                    {formData.hasNoNIN && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                        <p className="text-xs text-yellow-800">
+                          ⚠️ <strong>Provisional Registration:</strong> Your record will be flagged as provisional. 
+                          Please provide your NIN later to verify your account. A temporary ID will be generated using your date of birth.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="phone">Phone Number *</Label>

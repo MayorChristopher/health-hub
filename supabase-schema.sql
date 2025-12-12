@@ -6,7 +6,10 @@ CREATE TABLE patients (
   healthmr_id VARCHAR(20) UNIQUE NOT NULL,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
-  nin VARCHAR(11) UNIQUE NOT NULL,
+  nin VARCHAR(11) UNIQUE, -- Now nullable for provisional records
+  temp_id VARCHAR(50) UNIQUE, -- For patients without NIN
+  fingerprint_hash TEXT, -- Biometric identifier
+  record_status VARCHAR(20) DEFAULT 'verified', -- 'verified' or 'provisional'
   phone VARCHAR(15) NOT NULL,
   email VARCHAR(100),
   date_of_birth DATE NOT NULL,
@@ -21,7 +24,8 @@ CREATE TABLE patients (
   uses_herbal_medicine BOOLEAN DEFAULT false,
   herbal_types TEXT[],
   created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  updated_at TIMESTAMP DEFAULT NOW(),
+  CONSTRAINT check_nin_or_temp CHECK (nin IS NOT NULL OR temp_id IS NOT NULL)
 );
 
 -- Admin Table
@@ -49,7 +53,7 @@ CREATE TABLE medical_staff (
   last_login TIMESTAMP
 );
 
--- Vitals Table (Nursing Module)
+-- Vitals Table (Nursing Module) - DOCTOR/NURSE INPUT (Green Card)
 CREATE TABLE vitals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   patient_id UUID REFERENCES patients(id),
@@ -61,10 +65,26 @@ CREATE TABLE vitals (
   oxygen_saturation INTEGER,
   symptoms TEXT[],
   notes TEXT,
+  created_by VARCHAR(20) DEFAULT 'STAFF',
+  patient_can_edit BOOLEAN DEFAULT false,
   recorded_at TIMESTAMP DEFAULT NOW()
 );
 
--- Consultations Table (Doctor Module)
+-- Self-Reported Vitals Table - PATIENT INPUT (Blue Card)
+CREATE TABLE self_reported_vitals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  patient_id UUID REFERENCES patients(id),
+  temperature DECIMAL(4,1),
+  pulse INTEGER,
+  blood_pressure VARCHAR(10),
+  symptoms TEXT,
+  notes TEXT,
+  created_by VARCHAR(20) DEFAULT 'PATIENT',
+  patient_can_edit BOOLEAN DEFAULT true,
+  recorded_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Consultations Table (Doctor Module) - DOCTOR INPUT (Green Card)
 CREATE TABLE consultations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   patient_id UUID REFERENCES patients(id),
@@ -74,6 +94,9 @@ CREATE TABLE consultations (
   treatment_plan TEXT,
   notes TEXT,
   herb_drug_alert BOOLEAN DEFAULT false,
+  created_by VARCHAR(20) DEFAULT 'DOCTOR',
+  patient_can_edit BOOLEAN DEFAULT false,
+  digital_signature TEXT,
   consultation_date TIMESTAMP DEFAULT NOW()
 );
 
@@ -118,6 +141,20 @@ CREATE TABLE appointments (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Audit Log Table - Track all admin edits
+CREATE TABLE audit_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  admin_id UUID REFERENCES admins(id),
+  action VARCHAR(50) NOT NULL, -- 'edit_patient', 'delete_patient', 'update_nin', etc.
+  table_name VARCHAR(50) NOT NULL,
+  record_id UUID NOT NULL,
+  old_values JSONB,
+  new_values JSONB,
+  reason TEXT,
+  ip_address VARCHAR(45),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- Create indexes for better performance
 CREATE INDEX idx_patients_nin ON patients(nin);
 CREATE INDEX idx_patients_healthmr_id ON patients(healthmr_id);
@@ -132,21 +169,25 @@ CREATE INDEX idx_medical_staff_staff_id ON medical_staff(staff_id);
 ALTER TABLE patients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE medical_staff ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vitals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE self_reported_vitals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE consultations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lab_tests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prescriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies (Allow all for demo - restrict in production)
 CREATE POLICY "Allow all on admins" ON admins FOR ALL USING (true);
 CREATE POLICY "Allow all on patients" ON patients FOR ALL USING (true);
 CREATE POLICY "Allow all on medical_staff" ON medical_staff FOR ALL USING (true);
 CREATE POLICY "Allow all on vitals" ON vitals FOR ALL USING (true);
+CREATE POLICY "Allow all on self_reported_vitals" ON self_reported_vitals FOR ALL USING (true);
 CREATE POLICY "Allow all on consultations" ON consultations FOR ALL USING (true);
 CREATE POLICY "Allow all on lab_tests" ON lab_tests FOR ALL USING (true);
 CREATE POLICY "Allow all on prescriptions" ON prescriptions FOR ALL USING (true);
 CREATE POLICY "Allow all on appointments" ON appointments FOR ALL USING (true);
+CREATE POLICY "Allow all on audit_log" ON audit_log FOR ALL USING (true);
 
 -- Function to auto-generate HealthMR ID
 CREATE OR REPLACE FUNCTION generate_healthmr_id()

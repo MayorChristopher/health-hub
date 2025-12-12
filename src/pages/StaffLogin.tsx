@@ -1,25 +1,98 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
+import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Shield } from "lucide-react";
+import bcrypt from "bcryptjs";
 
 const StaffLogin = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     staffId: "",
     password: "",
-    role: "",
-    hospitalId: ""
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement staff authentication with Supabase
-    navigate("/medical-dashboard");
+    setLoading(true);
+
+    try {
+      // Find staff by staff_id
+      const { data: staff, error } = await supabase
+        .from("medical_staff")
+        .select("*")
+        .eq("staff_id", formData.staffId)
+        .single();
+
+      if (error || !staff) {
+        toast({
+          title: "Login Failed",
+          description: "Invalid Staff ID or password",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Check if account is active
+      if (!staff.is_active) {
+        toast({
+          title: "Account Inactive",
+          description: "Your account has been deactivated. Contact administrator.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Verify password
+      const passwordMatch = await bcrypt.compare(formData.password, staff.password_hash);
+
+      if (!passwordMatch) {
+        toast({
+          title: "Login Failed",
+          description: "Invalid Staff ID or password",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Update last login
+      await supabase
+        .from("medical_staff")
+        .update({ last_login: new Date().toISOString() })
+        .eq("id", staff.id);
+
+      // Store session
+      localStorage.setItem("staff_session", JSON.stringify({
+        id: staff.id,
+        staff_id: staff.staff_id,
+        full_name: staff.full_name,
+        role: staff.role,
+        hospital_id: staff.hospital_id,
+      }));
+
+      toast({
+        title: "Login Successful",
+        description: `Welcome back, ${staff.full_name}!`,
+      });
+
+      navigate("/medical-dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -67,48 +140,26 @@ const StaffLogin = () => {
               />
             </div>
 
-            <div>
-              <Label htmlFor="role">Role *</Label>
-              <Select value={formData.role} onValueChange={(value) => setFormData({...formData, role: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="doctor">Doctor</SelectItem>
-                  <SelectItem value="nurse">Nurse</SelectItem>
-                  <SelectItem value="lab_tech">Laboratory Technician</SelectItem>
-                  <SelectItem value="pharmacist">Pharmacist</SelectItem>
-                  <SelectItem value="admin">Administrator</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
 
-            <div>
-              <Label htmlFor="hospitalId">Hospital/Facility ID *</Label>
-              <Input 
-                id="hospitalId" 
-                placeholder="e.g., FMC-UMUAHIA"
-                value={formData.hospitalId} 
-                onChange={(e) => setFormData({...formData, hospitalId: e.target.value})} 
-                required 
-              />
-            </div>
 
             <Button 
               type="submit" 
               className="w-full bg-medical-green hover:bg-medical-dark"
-              disabled={!formData.staffId || !formData.password || !formData.role || !formData.hospitalId}
+              disabled={loading || !formData.staffId || !formData.password}
             >
-              Login to Portal
+              {loading ? "Logging in..." : "Login to Portal"}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              Don't have credentials?{" "}
-              <span className="text-medical-green cursor-pointer hover:underline">
-                Contact your hospital administrator
-              </span>
+            <p className="text-sm text-gray-600">
+              Don't have an account?{" "}
+              <button
+                onClick={() => navigate("/staff-registration")}
+                className="text-medical-green hover:underline font-medium"
+              >
+                Register here
+              </button>
             </p>
           </div>
 
